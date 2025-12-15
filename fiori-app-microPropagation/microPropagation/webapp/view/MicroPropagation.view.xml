@@ -1,0 +1,170 @@
+<mvc:View controllerName="com.9b.PhenoTrack.controller.MicroPropagation" xmlns:mvc="sap.ui.core.mvc" xmlns="sap.m" xmlns:f="sap.f"
+	xmlns:core="sap.ui.core" xmlns:layout="sap.ui.layout" xmlns:microchart="sap.suite.ui.microchart" xmlns:table="sap.ui.table"
+	xmlns:barcode="com.9b.PhenoTrack.control" xmlns:grid="sap.ui.layout.cssgrid" xmlns:viz.data="sap.viz.ui5.data"
+	xmlns:viz="sap.viz.ui5.controls" xmlns:viz.feeds="sap.viz.ui5.controls.common.feeds" xmlns:commons="sap.suite.ui.commons">
+	<f:DynamicPage id="dynamicPageId" showFooter="true" class="dyPage custFDynamicPageTitle" xmlns:l="sap.ui.layout">
+		<f:title>
+			<f:DynamicPageTitle>
+				<f:content>
+					<FlexBox direction="Row" justifyContent="SpaceAround" alignItems="Center">
+						<Text text="{i18n>Navigateto} " width="5rem"></Text>
+						<Select id="navigate" width="14rem" change="onChanageNavigate" forceSelection="false">
+							<core:Item key="Strain" text="{i18n>Strain}"/>
+							<core:Item key="ClonePlanner" text="Clone Planner"/>
+							<core:Item key="VegPlanner" text="{i18n>VegPlanner}"/>
+							<core:Item key="FlowerPlanner" text="{i18n>FlowerPlanner}"/>
+							<core:Item key="ManagePackages" text="{i18n>ManagePackages}"/>
+							<core:Item key="MotherPlanner" text="{i18n>MotherPlanner}"/>
+							<core:Item key="DestroyedPlants" text="{i18n>DestroyedPlants}"/>
+							<core:Item key="Waste" text="{i18n>RecordWaste}"/>
+						</Select>
+					</FlexBox>
+				</f:content>
+				<f:actions>
+					<Text text="{i18n>License}"></Text>
+					<Select busy="{jsonModel>/licBusy}" id="license" width="18rem" change="onChanageLicenseType" items="{jsonModel>/licenseList}"
+						selectedKey="{jsonModel>/selectedLicense}">
+						<core:Item key="{jsonModel>Code}" text="{jsonModel>Name} - {jsonModel>Code}"/>
+					</Select>
+					<Button icon="sap-icon://refresh" press="onPlantsRefresh" type="Default"/>
+				</f:actions>
+				<f:navigationActions>
+					<Button text="{jsonModel>/refreshText}" type="Transparent" enabled="false" class="lastUpdate" width="13rem"/>
+				</f:navigationActions>
+			</f:DynamicPageTitle>
+		</f:title>
+		<f:content>
+			<IconTabBar expanded="true" select="onTabChange" id="phenoTab" expandable="false" selectedKey="{jsonModel>/sIconTab}"
+				stretchContentHeight="true">
+				<items>
+					<IconTabFilter text="Reception" key="VEGETATION"/>
+					<IconTabFilter text="Preservation" key="MPROPAGATION"/>
+					<IconTabFilter text="Multiplication" key="PROPAGATION"/>
+					<IconTabFilter text="Storage" key="PACKAGING"/>
+				</items>
+				<content>
+					<VBox height="100%">
+						<VBox height="100%" class="fullHeight" width="100%">
+							<table:Table class="uiTableTable" id="clonePlannerTable" selectionMode="MultiToggle" rows="{path:'jsonModel>/cloneTableData'}"
+								visibleRowCountMode="Auto" rowSelectionChange="handleRowSelection" filter="customFilter" cellClick="cellClick">
+								<table:extension>
+									<OverflowToolbar visible="{= ${jsonModel>/sIconTab} === 'VEGETATION'}">
+										<Text class="tableTitle" id="tableHeader" text="Plants"/>
+										<ToolbarSpacer/>
+										<MultiInput width="25rem" placeholder="Search" tokenUpdate="tokenUpdateMultiInput" submit="onSubmitMultiInput" showValueHelp="false"
+											liveChange="onChangeMultiInput" id="searchFieldTable" enableMultiLineMode="true"/>
+										<Button text="{i18n>ClearAllFilters}" press="clearAllFilters"/>
+										<Text class="sapMTBSeparator"/>
+										<Button text="Move Cuttings" press="createClone" type="Default"/>
+										<Button text="{i18n>DestroyPlants}" press="performDestroyPlants" type="Reject"></Button>
+									</OverflowToolbar>
+									<OverflowToolbar visible="{= ${jsonModel>/sIconTab} === 'MPROPAGATION'}">
+										<Text class="tableTitle" id="tableHeader3" text="Plants"/>
+										<ToolbarSpacer/>
+										<MultiInput width="25rem" placeholder="Search" tokenUpdate="tokenUpdateMultiInput" submit="onSubmitMultiInput" showValueHelp="false"
+											liveChange="onChangeMultiInput" id="searchFieldTable5" enableMultiLineMode="true"/>
+										<Button text="{i18n>ClearAllFilters}" press="clearAllFilters"/>
+										<Text class="sapMTBSeparator"/>
+										<Button text="Innoculate" press="createCuttings" type="Default"/>
+										<Button text="Send For Storage" press="onHarvest" type="Default"/>
+										<Button text="Destroy Plants" press="performDestroyPlants" type="Reject"/>
+									</OverflowToolbar>
+									<OverflowToolbar visible="{= ${jsonModel>/sIconTab} === 'PROPAGATION'}">
+										<Text class="tableTitle" id="tableHeader1" text="Plants"/>
+										<ToolbarSpacer/>
+										<MultiInput width="25rem" placeholder="Search" tokenUpdate="tokenUpdateMultiInput" submit="onSubmitMultiInput" showValueHelp="false"
+											liveChange="onChangeMultiInput" id="searchFieldTable1" enableMultiLineMode="true"/>
+										<Button text="{i18n>ClearAllFilters}" press="clearAllFilters"/>
+										<Text class="sapMTBSeparator"/>
+										<Button text="Innoculate" press="createCuttings" type="Default"/>
+										<Button text="Record Callus" press="onHarvest" type="Default"/>
+										<Button text="Record Diff Callus" press="performDestroyPlants" type="Default"/>
+										<Button text="Mark As Clones" press="onHarvest" type="Default"/>
+										<Button text="Destroy Plants" press="performDestroyPlants" type="Reject"/>
+									</OverflowToolbar>
+									<OverflowToolbar visible="{= ${jsonModel>/sIconTab} === 'PACKAGING'}">
+										<Text class="tableTitle" id="tableHeader2" text="Plants"/>
+										<ToolbarSpacer/>
+										<MultiInput width="25rem" placeholder="Search" tokenUpdate="tokenUpdateMultiInput" submit="onSubmitMultiInput" showValueHelp="false"
+											liveChange="onChangeMultiInput" id="searchFieldTable2" enableMultiLineMode="true"/>
+										<Button text="{i18n>ClearAllFilters}" press="clearAllFilters"/>
+										<Text class="sapMTBSeparator"/>
+										<Button text="Send For Multiplication" press="onHarvest" type="Default"/>
+										<Button text="Destroy Plants" press="performDestroyPlants" type="Reject"/>
+									</OverflowToolbar>
+									<OverflowToolbar visible="false" id="searchFieldTable3" active="true" design="Info" height="2rem" press="onToolbarPress"
+										ariaLabelledBy="myText">
+										<Text text="{i18n>FilteredBy} : "/>
+										<Text id="searchFieldTable4" text="{i18n>Thereshouldbenointeractiveelementsinthetoolbar}"/>
+										<ToolbarSpacer/>
+										<core:Icon press="onCloseRefreshChart" src="sap-icon://undo" width="2rem"/>
+									</OverflowToolbar>
+								</table:extension>
+								<table:columns>
+									<table:Column sortProperty="BatchNum" filterProperty="BatchNum">
+										<Label text="Plant ID" design="Bold"/>
+										<table:template>
+											<Text text="{jsonModel>BatchNum}" wrapping="true"/>
+										</table:template>
+									</table:Column>
+									<table:Column sortProperty="U_NSTNM" filterProperty="U_NSTNM">
+										<Label text="Strain" design="Bold"/>
+										<table:template>
+											<Text text="{jsonModel>U_NSTNM}" wrapping="true"/>
+										</table:template>
+									</table:Column>
+									<table:Column sortProperty="ItemName" filterProperty="ItemName">
+										<Label text="Item Name" design="Bold"/>
+										<table:template>
+											<Text text="{jsonModel>ItemName}" wrapping="true"/>
+										</table:template>
+									</table:Column>
+									<table:Column sortProperty="MnfSerial" filterProperty="MnfSerial">
+										<Label text="{i18n>Source}" design="Bold"/>
+										<table:template>
+											<Text text="{jsonModel>MnfSerial}" wrapping="true"/>
+										</table:template>
+									</table:Column>
+									<table:Column sortProperty="IntrSerial" filterProperty="IntrSerial">
+										<Label text="Batch ID" design="Bold"/>
+										<table:template>
+											<Text text="{jsonModel>IntrSerial}" wrapping="true"/>
+										</table:template>
+									</table:Column>
+									<table:Column sortProperty="WhsName" filterProperty="WhsName">
+										<Label text="{i18n>Location}" design="Bold"/>
+										<table:template>
+											<Text text="{jsonModel>WhsCode} - {jsonModel>WhsName}" wrapping="true"/>
+										</table:template>
+									</table:Column>
+									<table:Column sortProperty="U_Phase" filterProperty="U_Phase">
+										<Label text="Phase" design="Bold"/>
+										<table:template>
+											<Text text="{jsonModel>U_Phase}" wrapping="true"/>
+										</table:template>
+									</table:Column>
+									<table:Column sortProperty="CreateDate" filterProperty="CreateDate">
+										<Label text="Created Date" design="Bold"/>
+										<table:template>
+											<Text text="{jsonModel>CreateDate}" wrapping="true"/>
+										</table:template>
+									</table:Column>
+								</table:columns>
+							</table:Table>
+						</VBox>
+					</VBox>
+				</content>
+			</IconTabBar>
+		</f:content>
+		<f:footer>
+			<Bar>
+				<contentLeft>
+					<!--<Button id="resPop" icon="sap-icon://information" press="handleOpenPopOver" ariaHasPopup="Dialog"/>-->
+				</contentLeft>
+				<contentRight>
+					<Text text="{jsonModel>/versionInfo}"/>
+				</contentRight>
+			</Bar>
+		</f:footer>
+	</f:DynamicPage>
+</mvc:View>

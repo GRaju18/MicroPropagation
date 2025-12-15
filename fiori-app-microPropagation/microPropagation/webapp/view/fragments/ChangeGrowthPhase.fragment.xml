@@ -1,0 +1,38 @@
+<core:FragmentDefinition xmlns="sap.m" xmlns:core="sap.ui.core" xmlns:l="sap.ui.layout">
+	<Dialog id="changeGrowthPhase" contentWidth="28rem" class="sapUiSizeCompact iconDialog waterDialog" stretch="{device>/system/phone}">
+		<customHeader>
+			<Bar>
+				<contentMiddle>
+					<Label text="{i18n>ChangeGrowthPhase}"/>
+				</contentMiddle>
+			</Bar>
+		</customHeader>
+		<content>
+			<FlexBox direction="Column">
+				<InputListItem label="No. of plants">
+					<Input id="avalQty" editable="false" width="15rem"/>
+				</InputListItem>
+				<InputListItem label="{i18n>SelectGrowthPhase}">
+					<Select id="growthPhase" width="15rem" selectedKey="{jsonModel>/gPhase}" forceSelection="false" editable="false">
+						<core:Item key="Vegetative" text="Vegetative"/>
+					</Select>
+				</InputListItem>
+				<InputListItem label="{i18n>SelectLocation}">
+					<Select id="location" width="15rem" items="{path: 'jsonModel>/CGPVegList', sorter : { path : 'key', descending : false }}"
+						forceSelection="false">
+						<core:Item key="{jsonModel>key}" text="{jsonModel>key} - {jsonModel>text}"/>
+					</Select>
+				</InputListItem>
+				<InputListItem label="{i18n>Date}">
+					<DatePicker id="mDate" displayFormat="yyyy-MM-dd" width="15rem"/>
+				</InputListItem>
+			</FlexBox>
+		</content>
+		<beginButton>
+			<Button type="Emphasized" text="{i18n>Ok}" press="chageGrowthPhase"></Button>
+		</beginButton>
+		<endButton>
+			<Button type="Transparent" text="{i18n>Cancel}" press="onChangeGrowthPhaseClose"></Button>
+		</endButton>
+	</Dialog>
+</core:FragmentDefinition>

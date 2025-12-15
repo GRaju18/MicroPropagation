@@ -1,0 +1,58 @@
+<core:FragmentDefinition xmlns="sap.m" xmlns:core="sap.ui.core" xmlns:l="sap.ui.layout" xmlns:uxap="sap.uxap" xmlns:mvc="sap.ui.core.mvc"
+	height="100%">
+	<Dialog class="sapUiSizeCompactDia" draggable="true" contentWidth="{= ${device>/system/desktop} ? '25rem':'auto'}" title="Harvest"
+		busy="{jsonModel>/busyView}">
+		<content>
+			<uxap:ObjectPageLayout showHeaderContent="{= !!${jsonModel>/showHeaderHarvest} }" busy="{jsonModel>/showBusy}"
+				toggleHeaderOnTitleClick="{= !!${jsonModel>/showHeaderHarvest} }" upperCaseAnchorBar="false">
+				<uxap:headerTitle>
+					<uxap:ObjectPageDynamicHeaderTitle>
+						<uxap:heading>
+							<Input id="barcode" submit="bulkHarvestTagScan" width="16rem" placeholder="Scan or Enter Harvest Name"/>
+						</uxap:heading>
+					</uxap:ObjectPageDynamicHeaderTitle>
+				</uxap:headerTitle>
+				<uxap:sections>
+					<uxap:ObjectPageSection showTitle="false" visible="{jsonModel>/showMessagePage}">
+						<uxap:subSections>
+							<uxap:ObjectPageSubSection class="sapUxAPObjectPageSubSectionFitContainer">
+								<MessagePage showHeader="false" icon="sap-icon://tags" text="{jsonModel>/scanTextHarvest}" description=""/>
+							</uxap:ObjectPageSubSection>
+						</uxap:subSections>
+					</uxap:ObjectPageSection>
+					<uxap:ObjectPageSection showTitle="false" visible="{= !${jsonModel>/showMessagePage}}">
+						<uxap:subSections>
+							<uxap:ObjectPageSubSection>
+								<HBox>
+									<VBox width="100%" justifyContent="SpaceBetween">
+										<Label text="Item" design="Bold"/>
+										<Select id="harvstItem" width="100%" items="{path: 'jsonModel>/itemList'}" forceSelection="true" editable="false"
+											selectedKey="{jsonModel>/bulkHarvestObj/harvestItem}">
+											<items>
+												<core:Item key="{jsonModel>ItemCode}" text="{jsonModel>ItemName}"/>
+											</items>
+										</Select>
+										<Label text="Available Plants" design="Bold"/>
+										<Input width="100%" editable="false" value="{jsonModel>/bulkHarvestObj/avPlants}"/>
+										<Label text="Package ID" design="Bold"/>
+										<Input width="100%" value="{jsonModel>/bulkHarvestObj/enteredHarvest}" change="bulkHarvestNameChange"/>
+										<Label text="Net Wgt (g)" design="Bold"/>
+										<Input width="100%" value="{jsonModel>/bulkHarvestObj/fWetWt}"/>
+										<Label design="Bold" text="Location"/>
+										<Input id="sRoom" width="100%" editable="false" value="{jsonModel>/bulkHarvestObj/harvestRoom}"/>
+									</VBox>
+								</HBox>
+							</uxap:ObjectPageSubSection>
+						</uxap:subSections>
+					</uxap:ObjectPageSection>
+				</uxap:sections>
+			</uxap:ObjectPageLayout>
+		</content>
+		<beginButton>
+			<Button id="seachBtn" text="Harvest Plants" press="postBulkHarvestData" type="Emphasized"></Button>
+		</beginButton>
+		<endButton>
+			<Button text="Close" type="Transparent" press="onHarvestClose" width="5rem"/>
+		</endButton>
+	</Dialog>
+</core:FragmentDefinition>
