@@ -1,4 +1,4 @@
-<core:FragmentDefinition xmlns="sap.m" xmlns:core="sap.ui.core" xmlns:l="sap.ui.layout" xmlns:barcode="com.9b.PhenoTrack.control">
+<core:FragmentDefinition xmlns="sap.m" xmlns:core="sap.ui.core" xmlns:l="sap.ui.layout" xmlns:barcode="com.9b.MicroPropagation.control">
 	<Dialog id="createSeedling" contentWidth="28rem" class="sapUiSizeCompact iconDialog waterDialog" stretch="{device>/system/phone}">
 		<customHeader>
 			<Bar>

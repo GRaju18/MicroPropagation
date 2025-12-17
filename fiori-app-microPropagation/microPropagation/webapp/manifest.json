@@ -1,7 +1,7 @@
 {
 	"_version": "1.12.0",
 	"sap.app": {
-		"id": "com.9b.PhenoTrack",
+		"id": "com.9b.MicroPropagation",
 		"type": "application",
 		"i18n": "i18n/i18n.properties",
 		"applicationVersion": {
@@ -37,7 +37,7 @@
 	"sap.ui5": {
 		"flexEnabled": false,
 		"rootView": {
-			"viewName": "com.9b.PhenoTrack.view.App",
+			"viewName": "com.9b.MicroPropagation.view.App",
 			"type": "XML",
 			"async": true,
 			"id": ""
@@ -58,7 +58,7 @@
 			"i18n": {
 				"type": "sap.ui.model.resource.ResourceModel",
 				"settings": {
-					"bundleName": "com.9b.PhenoTrack.i18n.i18n"
+					"bundleName": "com.9b.MicroPropagation.i18n.i18n"
 				}
 			}
 		},
@@ -79,7 +79,7 @@
 				"routerClass": "sap.f.routing.Router",
 				"viewType": "XML",
 				"async": true,
-				"viewPath": "com.9b.PhenoTrack.view",
+				"viewPath": "com.9b.MicroPropagation.view",
 				"controlAggregation": "pages",
 				"controlId": "app",
 				"clearControlAggregation": false,
@@ -88,16 +88,16 @@
 				}
 			},
 			"routes": [{
-					"name": "PhenoTrack",
+					"name": "MicroPropagation",
 					"pattern": "",
 					"titleTarget": "",
 					"greedy": false,
-					"target": ["PhenoTrack"]
+					"target": ["MicroPropagation"]
 				}
 
 			],
 			"targets": {
-				"PhenoTrack": {
+				"MicroPropagation": {
 					"viewType": "XML",
 					"transition": "slide",
 					"clearControlAggregation": true,

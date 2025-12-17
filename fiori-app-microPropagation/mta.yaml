@@ -1,25 +1,25 @@
 _schema-version: "3.2"
-ID: ext-fiori-PhenoTrack
+ID: ext-fiori-MicroPropagation
 version: 0.0.1
 provider: SAP
 modules:
-- name: ext-PhenoTrack-app-v2-content
+- name: ext-MicroPropagation-app-v2-content
   type: com.sap.application.content
   path: .
   requires:
-  - name: ext-PhenoTrack-app-v2-html5-repo-host
+  - name: ext-MicroPropagation-app-v2-html5-repo-host
     parameters:
       content-target: true
   build-parameters:
     build-result: resources
     requires:
     - artifacts:
-      - sapb1phenotrack.zip
-      name: sapb1phenotrack
+      - sapb1MicroPropagation.zip
+      name: sapb1MicroPropagation
       target-path: resources/
-- name: sapb1phenotrack
+- name: sapb1MicroPropagation
   type: html5
-  path: PhenoTrack
+  path: MicroPropagation
   build-parameters:
     build-result: dist
     builder: custom
@@ -28,11 +28,11 @@ modules:
     - npm run build:cf
     supported-platforms: []
 resources:
-- name: ext-PhenoTrack-app-v2-html5-repo-host
+- name: ext-MicroPropagation-app-v2-html5-repo-host
   type: org.cloudfoundry.managed-service
   parameters:
     service: html5-apps-repo
-    service-name: ext-PhenoTrack-app-v2-html5-app-host-service
+    service-name: ext-MicroPropagation-app-v2-html5-app-host-service
     service-plan: app-host
 parameters:
   deploy_mode: b1-webclient

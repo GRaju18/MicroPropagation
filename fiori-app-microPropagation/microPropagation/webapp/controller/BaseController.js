@@ -7,7 +7,7 @@ sap.ui.define([
 	"sap/ui/model/Filter"
 ], function (Controller, UIComponent, History, MessageBox, Filter) {
 	"use strict";
-	return Controller.extend("com.9b.PhenoTrack.controller.BaseController", {
+	return Controller.extend("com.9b.MicroPropagation.controller.BaseController", {
 		/**
 		 * Convenience method for accessing the router.
 		 * @public
@@ -505,6 +505,12 @@ sap.ui.define([
 			var AppNavigator;
 			if (pageTo === "Strain") {
 				AppNavigator = serLayerTargetUrl.Strain;
+			}
+			if (pageTo === "PhenoTrack") {
+				AppNavigator = serLayerTargetUrl.PhenoTrack;
+			}
+			if (pageTo === "MicroPropagation") {
+				AppNavigator = serLayerTargetUrl.MicroPropagation;
 			}
 			if (pageTo === "ClonePlanner") {
 				AppNavigator = serLayerTargetUrl.ClonePlanner;

@@ -3,7 +3,7 @@ sap.ui.define([
 ], function (Controller) {
 	"use strict";
 
-	return Controller.extend("com.9b.PhenoTrack.controller.App", {
+	return Controller.extend("com.9b.MicroPropagation.controller.App", {
 
 		/**
 		 * Called when a controller is instantiated and its View controls (if available) are already created.
