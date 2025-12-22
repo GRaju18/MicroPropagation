@@ -38,10 +38,10 @@
 			<IconTabBar expanded="true" select="onTabChange" id="phenoTab" expandable="false" selectedKey="{jsonModel>/sIconTab}"
 				stretchContentHeight="true">
 				<items>
-					<IconTabFilter text="Reception" key="VEGETATION"/>
-					<IconTabFilter text="Preservation" key="MPROPAGATION"/>
-					<IconTabFilter text="Multiplication" key="PROPAGATION"/>
-					<IconTabFilter text="Storage" key="PACKAGING"/>
+					<IconTabFilter text="Reception" key="RECEPTION"/>
+					<IconTabFilter text="Preservation" key="PRESERVATION"/>
+					<IconTabFilter text="Multiplication" key="MULTIPLICATION"/>
+					<IconTabFilter text="Storage" key="STORAGE"/>
 				</items>
 				<content>
 					<VBox height="100%">
@@ -50,41 +50,46 @@
 								rows="{path:'jsonModel>/microPropagationTableData'}" visibleRowCountMode="Auto" rowSelectionChange="handleRowSelection"
 								filter="customFilter" cellClick="cellClick">
 								<table:extension>
-									<OverflowToolbar visible="{= ${jsonModel>/sIconTab} === 'VEGETATION'}">
+									<OverflowToolbar visible="{= ${jsonModel>/sIconTab} === 'RECEPTION'}">
 										<Text class="tableTitle" id="tableHeader" text="Plants"/>
 										<ToolbarSpacer/>
 										<MultiInput width="25rem" placeholder="Search" tokenUpdate="tokenUpdateMultiInput" submit="onSubmitMultiInput" showValueHelp="false"
 											liveChange="onChangeMultiInput" id="searchFieldTable" enableMultiLineMode="true"/>
 										<Button text="{i18n>ClearAllFilters}" press="clearAllFilters"/>
 										<Text class="sapMTBSeparator"/>
+										<Button text="Innoculate" press="onInnoculate" type="Default"/>
 										<Button text="Move Cuttings" press="moveCuttings" type="Default"/>
 										<Button text="{i18n>DestroyPlants}" press="performDestroyPlants" type="Reject"></Button>
+										<Button text="Record Residue" press="performRecordResidue" type="Default"></Button>
 									</OverflowToolbar>
-									<OverflowToolbar visible="{= ${jsonModel>/sIconTab} === 'MPROPAGATION'}">
+									<OverflowToolbar visible="{= ${jsonModel>/sIconTab} === 'PRESERVATION'}">
 										<Text class="tableTitle" id="tableHeader3" text="Plants"/>
 										<ToolbarSpacer/>
 										<MultiInput width="25rem" placeholder="Search" tokenUpdate="tokenUpdateMultiInput" submit="onSubmitMultiInput" showValueHelp="false"
 											liveChange="onChangeMultiInput" id="searchFieldTable5" enableMultiLineMode="true"/>
 										<Button text="{i18n>ClearAllFilters}" press="clearAllFilters"/>
 										<Text class="sapMTBSeparator"/>
-										<Button text="Innoculate" press="Innoculate" type="Default"/>
+										<Button text="Innoculate" press="onInnoculate" type="Default"/>
 										<Button text="Send For Storage" press="sendToStorage" type="Default"/>
 										<Button text="Destroy Plants" press="performDestroyPlants" type="Reject"/>
+										<Button text="Record Residue" press="performRecordResidue" type="Default"></Button>
 									</OverflowToolbar>
-									<OverflowToolbar visible="{= ${jsonModel>/sIconTab} === 'PROPAGATION'}">
+									<OverflowToolbar visible="{= ${jsonModel>/sIconTab} === 'MULTIPLICATION'}">
 										<Text class="tableTitle" id="tableHeader1" text="Plants"/>
 										<ToolbarSpacer/>
 										<MultiInput width="25rem" placeholder="Search" tokenUpdate="tokenUpdateMultiInput" submit="onSubmitMultiInput" showValueHelp="false"
 											liveChange="onChangeMultiInput" id="searchFieldTable1" enableMultiLineMode="true"/>
 										<Button text="{i18n>ClearAllFilters}" press="clearAllFilters"/>
 										<Text class="sapMTBSeparator"/>
-										<Button text="Innoculate" press="Innoculate" type="Default"/>
-										<Button text="Record Callus" press="RecordCallus" type="Default"/>
-										<Button text="Record Diff Callus" press="RecordDiffCallus" type="Default"/>
+										<Button text="Send For Preservation" press="sendToPreservation" type="Default"/>
+										<Button text="Innoculate" press="onInnoculate" type="Default"/>
+										<Button text="Record Callus" press="onRecordCallus" type="Default"/>
+										<Button text="Record Diff Callus" press="onRecordDiffCallus" type="Default"/>
 										<Button text="Mark As Clones" press="markAsClones" type="Default"/>
 										<Button text="Destroy Plants" press="performDestroyPlants" type="Reject"/>
+										<Button text="Record Residue" press="performRecordResidue" type="Default"></Button>
 									</OverflowToolbar>
-									<OverflowToolbar visible="{= ${jsonModel>/sIconTab} === 'PACKAGING'}">
+									<OverflowToolbar visible="{= ${jsonModel>/sIconTab} === 'STORAGE'}">
 										<Text class="tableTitle" id="tableHeader2" text="Plants"/>
 										<ToolbarSpacer/>
 										<MultiInput width="25rem" placeholder="Search" tokenUpdate="tokenUpdateMultiInput" submit="onSubmitMultiInput" showValueHelp="false"
@@ -93,13 +98,7 @@
 										<Text class="sapMTBSeparator"/>
 										<Button text="Send For Multiplication" press="sendToMultiplication" type="Default"/>
 										<Button text="Destroy Plants" press="performDestroyPlants" type="Reject"/>
-									</OverflowToolbar>
-									<OverflowToolbar visible="false" id="searchFieldTable3" active="true" design="Info" height="2rem" press="onToolbarPress"
-										ariaLabelledBy="myText">
-										<Text text="{i18n>FilteredBy} : "/>
-										<Text id="searchFieldTable4" text="{i18n>Thereshouldbenointeractiveelementsinthetoolbar}"/>
-										<ToolbarSpacer/>
-										<core:Icon press="onCloseRefreshChart" src="sap-icon://undo" width="2rem"/>
+										<Button text="Record Residue" press="performRecordResidue" type="Default"></Button>
 									</OverflowToolbar>
 								</table:extension>
 								<table:columns>

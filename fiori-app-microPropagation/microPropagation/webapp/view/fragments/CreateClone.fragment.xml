@@ -3,34 +3,39 @@
 		<customHeader>
 			<Bar>
 				<contentMiddle>
-					<Label text="Create Cuttings"/>
+					<Label text="Mark As Clone"/>
 				</contentMiddle>
 			</Bar>
 		</customHeader>
 		<content>
 			<FlexBox direction="Column">
 				<FlexBox direction="Column">
-					<InputListItem label="{i18n>SelectMotherPlant}">
-						<Select id="mPlant" width="15rem" items="{path: 'jsonModel>/motherPlantData',sorter : { path : 'U_NSTNM', descending : false } }"
-							forceSelection="false" selectedKey="{jsonModel>/sCloneData/sMotherPlant}">
-							<core:Item key="{jsonModel>BatchNum}" text="{jsonModel>BatchNum} - {jsonModel>strainValue}"/>
-						</Select>
+					<InputListItem label="No. of plants">
+						<Input id="avalQty" editable="false" width="15rem"/>
 					</InputListItem>
-					<InputListItem label="{i18n>EnterQuantity}">
-						<Input id="eQty" width="15rem" liveChange="onChangeQuantity" value="{jsonModel>/sCloneData/sQty}"/>
-					</InputListItem>
-					<InputListItem label="{i18n>Date}">
-						<DatePicker
-							value="{path:'jsonModel>/sCloneData/sDate', type:'sap.ui.model.type.Date', formatOptions: { style: 'medium', strictParsing: true, 'pattern': 'yyyy-MM-dd'}}"
-							width="15rem"/>
-					</InputListItem>
-					<InputListItem label="{i18n>Location}">
-						<Select id="location" width="15rem" items="{path: 'jsonModel>/createCloneLocation' ,sorter : { path : 'key', descending : false }}"
-							forceSelection="false" selectedKey="{jsonModel>/sCloneData/sLocation}">
+					<!--<InputListItem label="Growth Phase">-->
+					<!--	<Select id="growthPhase" width="15rem" forceSelection="true" editable="false">-->
+					<!--		<core:Item key="Clone" text="Clone"/>-->
+					<!--	</Select>-->
+					<!--</InputListItem>-->
+					<InputListItem label="Item">
+						<Select id="Item" width="15rem" items="{path: 'jsonModel>/CloneItemsList'}" forceSelection="false" editable="false">
 							<items>
-								<core:Item key="{jsonModel>key}" text="{jsonModel>key} - {jsonModel>text}"/>
+								<core:Item key="{jsonModel>ItemCode}" text="{jsonModel>ItemName}"/>
 							</items>
 						</Select>
+					</InputListItem>
+					<InputListItem label="Phase">
+						<Select id="phase" width="15rem" forceSelection=" false">
+							<items>
+								<core:Item key="Mother" text="Mother"/>
+								<core:Item key="Clone" text="Cultivation"/>
+								<core:Item key="" text="Clone Cultivation"/>
+							</items>
+						</Select>
+					</InputListItem>
+					<InputListItem label="{i18n>Date}">
+						<DatePicker id="mDate" displayFormat="yyyy-MM-dd" width="15rem"/>
 					</InputListItem>
 				</FlexBox>
 			</FlexBox>

@@ -21,7 +21,7 @@ sap.ui.define([
 				var jsonModel = this.getOwnerComponent().getModel("jsonModel");
 				sap.ui.core.BusyIndicator.hide();
 				this.getView().byId("microPropagationTable").clearSelection();
-				jsonModel.setProperty("/sIconTab", "VEGETATION");
+				jsonModel.setProperty("/sIconTab", "RECEPTION");
 				this.loadLicenseData();
 			}
 		},
@@ -79,13 +79,13 @@ sap.ui.define([
 			}
 			var selTab = this.byId("phenoTab").getSelectedKey();
 			var filters;
-			if (selTab == "VEGETATION") {
+			if (selTab == "RECEPTION") {
 				filters = "?$filter=U_MetrcLicense eq " + "'" + licenseNo + "'  and Quantity ne 0 and U_Phase eq 'Cutting' ";
-			} else if (selTab == "MPROPAGATION") {
+			} else if (selTab == "PRESERVATION") {
 				filters = "?$filter=U_MetrcLicense eq " + "'" + licenseNo + "'  and Quantity ne 0 and U_Phase eq 'MP_Preserve'";
-			} else if (selTab == "PROPAGATION") {
+			} else if (selTab == "MULTIPLICATION") {
 				filters = "?$filter=U_MetrcLicense eq " + "'" + licenseNo + "'  and Quantity ne 0 and U_Phase eq 'MP_Multiply'";
-			} else if (selTab == "PACKAGING") {
+			} else if (selTab == "STORAGE") {
 				filters = "?$filter=U_MetrcLicense eq " + "'" + licenseNo + "'  and Quantity ne 0 and U_Phase eq 'MP_Store'";
 			}
 			var orderBy = "&$orderby=BatchNum desc";
@@ -116,7 +116,7 @@ sap.ui.define([
 			}, this.getView());
 		},
 
-		/***method start for move cuttings phase***/
+		/***method start for Reception***/
 		moveCuttings: function () {
 			var sItems, that = this;
 			var table = this.getView().byId("microPropagationTable");
@@ -186,8 +186,9 @@ sap.ui.define([
 				that.byId("microPropagationTable").setSelectedIndex(-1);
 			}, this.moveCuttingsDialog);
 		},
-		/***method end for move cuttings phase***/
+		/***method end for Reception**/
 
+		/***method start for Preservation***/
 		sendToStorage: function () {
 			var that = this;
 			var jsonModel = that.getOwnerComponent().getModel("jsonModel");
@@ -228,22 +229,25 @@ sap.ui.define([
 				sap.m.MessageToast.show("Please select atleast one plant");
 			}
 		},
+		/***method end for Preservation***/
 
-		sendToMultiplication: function () {
+		/***methods start for Multiplication tab***/
+		//method for send to Preservation
+		sendToPreservation: function () {
 			var that = this;
 			var jsonModel = that.getOwnerComponent().getModel("jsonModel");
 			var sItems;
 			var microPropagationTable = this.getView().byId("microPropagationTable");
 			sItems = microPropagationTable.getSelectedIndices();
 			if (sItems.length > 0) {
-				sap.m.MessageBox.confirm("Are you sure you want to move these plants for Multiplication ?", {
+				sap.m.MessageBox.confirm("Are you sure you want to move these plants for Preservation ?", {
 					onClose: function (action) {
 						if (action === "OK") {
 							var sObj, batchUrl = [];
 							$.each(sItems, function (i, e) {
 								sObj = microPropagationTable.getContextByIndex(e).getObject();
 								var payLoadInventoryEntry = {
-									U_Phase: "MP_Multiply"
+									U_Phase: "MP_Preserve"
 								};
 								batchUrl.push({
 									url: "/b1s/v2/BatchNumberDetails(" + sObj.AbsEntry + ")",
@@ -257,7 +261,7 @@ sap.ui.define([
 								if (errorTxt.length > 0) {
 									sap.m.MessageBox.error(errorTxt.join("\n"));
 								} else {
-									sap.m.MessageToast.show("Selected plants are moved for Multiplication");
+									sap.m.MessageToast.show("Selected plants are moved for Preservation");
 								}
 								that.loadStrainData();
 								microPropagationTable.setSelectedIndex(-1);
@@ -270,26 +274,8 @@ sap.ui.define([
 			}
 		},
 
-		markAsClones: function () {
-
-		},
-
-		/** Method for clear all filters**/
-		clearAllFilters: function () {
-			this.onCloseRefreshChart();
-			var filterTable = this.getView().byId("microPropagationTable");
-			var aColumns = filterTable.getColumns();
-			for (var i = 0; i <= aColumns.length; i++) {
-				filterTable.filter(aColumns[i], null);
-				filterTable.sort(aColumns[i], null);
-			}
-			this.byId("searchFieldTable").removeAllTokens();
-			this.byId("searchFieldTable1").removeAllTokens();
-			this.byId("searchFieldTable2").removeAllTokens();
-		},
-
-		/***method start for change growth phase***/
-		changeGrowthPhase: function () {
+		//method for Innoculate
+		onInnoculate: function () {
 			var jsonModel = this.getOwnerComponent().getModel("jsonModel");
 			var sItems, that = this;
 			var updateObject;
@@ -297,20 +283,17 @@ sap.ui.define([
 			sItems = table.getSelectedIndices();
 			if (sItems.length > 0) {
 				updateObject = table.getContextByIndex(sItems[0]).getObject();
-				if (updateObject.ItemName.search("Cannabis Plant") == -1) {
-					if (!this.changeGrowthPhaseDialog) {
-						this.changeGrowthPhaseDialog = sap.ui.xmlfragment("changeGrowthPhaseDialog",
-							"com.9b.MicroPropagation.view.fragments.ChangeGrowthPhase", this);
-						this.getView().addDependent(this.changeGrowthPhaseDialog);
+				if (updateObject.ItemName.search("Cutting") !== -1) {
+					if (!this.InnoculateGrowthPhaseDialog) {
+						this.InnoculateGrowthPhaseDialog = sap.ui.xmlfragment("InnoculateGrowthPhaseDialog",
+							"com.9b.MicroPropagation.view.fragments.InnoculateGrowthPhase", this);
+						this.getView().addDependent(this.InnoculateGrowthPhaseDialog);
 					}
-					if (updateObject.ItemName.search("Seedling") !== -1) {
-						jsonModel.setProperty("/gPhase", "Vegetative");
-					}
-					sap.ui.core.Fragment.byId("changeGrowthPhaseDialog", "avalQty").setValue(sItems.length);
-					sap.ui.core.Fragment.byId("changeGrowthPhaseDialog", "location").setSelectedKey("");
-					sap.ui.core.Fragment.byId("changeGrowthPhaseDialog", "mDate").setDateValue(new Date());
-					this.changeGrowthPhaseDialog.open();
-					this.loadAllCloneData();
+					sap.ui.core.Fragment.byId("InnoculateGrowthPhaseDialog", "avalQty").setValue(sItems.length);
+					//sap.ui.core.Fragment.byId("InnoculateGrowthPhaseDialog", "location").setSelectedKey("");
+					sap.ui.core.Fragment.byId("InnoculateGrowthPhaseDialog", "mDate").setDateValue(new Date());
+					this.InnoculateGrowthPhaseDialog.open();
+					this.loadInnoculateItems(updateObject);
 				} else {
 					sap.m.MessageToast.show("You can not change the growth phase of this plant");
 					return;
@@ -319,61 +302,83 @@ sap.ui.define([
 				sap.m.MessageToast.show("Please select atleast one plant");
 			}
 		},
-		onChangeGrowthPhaseClose: function () {
-			this.changeGrowthPhaseDialog.close();
-		},
-		chageGrowthPhase: function () {
+		loadInnoculateItems: function (updateObject) {
+			var cannabisItemArray = [];
 			var jsonModel = this.getOwnerComponent().getModel("jsonModel");
-			var table = this.getView().byId("microPropagationTable");
-			var vRoom = sap.ui.core.Fragment.byId("changeGrowthPhaseDialog", "growthPhase").getSelectedKey();
-			var locationID = sap.ui.core.Fragment.byId("changeGrowthPhaseDialog", "location").getSelectedKey();
-			var createDate = sap.ui.core.Fragment.byId("changeGrowthPhaseDialog", "mDate").getDateValue();
-			var dateFormat = DateFormat.getDateInstance({
-				pattern: "yyyy-MM-dd"
-			});
-			var createdDate = dateFormat.format(createDate);
-			if (locationID === "") {
-				sap.m.MessageToast.show("Please select Location");
-				return;
-			}
-			var that = this;
-			var sItems;
-			sItems = table.getSelectedIndices();
-			var count = sItems.length;
-			if (sItems.length == 0) {
-				sap.m.MessageToast.show("Please select atleast one plant");
-				return;
-			}
-
-			//inventory entry to seedling item
-			var cannabisItemCodeList = jsonModel.getProperty("/cannabisItemCodeList");
-			var cannabisItemArray = [],
-				invTraDesDataEntry = [],
-				batchUrl = [];
-			var sObj, payLoadInventory, cannabisItemCode;
-
-			$.each(sItems, function (i, e) {
-				sObj = table.getContextByIndex(e).getObject();
-				var itemName = sObj.ItemName;
-				var strainName = itemName.split(" - ")[0];
-				$.each(cannabisItemCodeList, function (i, e2) {
-					if (e2.ItemName === strainName + " - " + "Cannabis Plant") {
+			var filters4 = "?$filter=U_NLFID eq " + "'" + jsonModel.getProperty("/selectedLicense") + "' and ItemsGroupCode eq 109";
+			var fields4 = "&$select=" + ["ItemName", "ItemsGroupCode", "ItemCode", "U_NLFID"].join();
+			this.readServiecLayer("/b1s/v2/Items" + filters4 + fields4, function (data) {
+				jsonModel.setProperty("/InnoculateItemsList", data.value);
+				var strainName = updateObject.ItemName.split(" - ")[0];
+				$.each(data.value, function (i, e2) {
+					if (e2.ItemName === strainName + " - " + "Stem VM") {
 						cannabisItemArray.push(e2);
 					}
 				});
 				if (cannabisItemArray.length > 0) {
-					cannabisItemCode = cannabisItemArray[0].ItemCode;
+					var cannabisItemCode = cannabisItemArray[0].ItemCode;
 				}
+				sap.ui.core.Fragment.byId("InnoculateGrowthPhaseDialog", "Item").setSelectedKey(cannabisItemCode);
+			});
+		},
+		InnoculateClose: function () {
+			this.InnoculateGrowthPhaseDialog.close();
+		},
+		InnoculateGrowthPhase: function () {
+			var jsonModel = this.getOwnerComponent().getModel("jsonModel");
+			var table = this.getView().byId("microPropagationTable");
+			var vRoom = sap.ui.core.Fragment.byId("InnoculateGrowthPhaseDialog", "growthPhase").getSelectedKey();
+			//var locationID = sap.ui.core.Fragment.byId("InnoculateGrowthPhaseDialog", "location").getSelectedKey();
+			var createDate = sap.ui.core.Fragment.byId("InnoculateGrowthPhaseDialog", "mDate").getDateValue();
+			var dateFormat = DateFormat.getDateInstance({
+				pattern: "yyyy-MM-dd"
+			});
+			var createdDate = dateFormat.format(createDate);
+			// if (locationID === "") {
+			// 	sap.m.MessageToast.show("Please select Location");
+			// 	return;
+			// }
+			var that = this;
+			var sItems = table.getSelectedIndices();
 
+			//inventory entry to seedling item
+			var InnoculateItemsList = jsonModel.getProperty("/InnoculateItemsList");
+			var innoculateItemArray = [],
+				invTraDesDataEntry = [],
+				batchUrl = [];
+			var sObj, payLoadInventory, innoculateItemCode, U_Phase;
+
+			var selTab = this.byId("phenoTab").getSelectedKey();
+			if (selTab == "RECEPTION") {
+				U_Phase = "Cutting";
+			} else if (selTab == "PRESERVATION") {
+				U_Phase = "MP_Preserve";
+			} else if (selTab == "MULTIPLICATION") {
+				U_Phase = "MP_Multiply";
+			}
+
+			//inventory entry to Item
+			$.each(sItems, function (i, e) {
+				sObj = table.getContextByIndex(e).getObject();
+				var itemName = sObj.ItemName;
+				var strainName = itemName.split(" - ")[0];
+				$.each(InnoculateItemsList, function (i, e2) {
+					if (e2.ItemName === strainName + " - " + "Stem VM") {
+						innoculateItemArray.push(e2);
+					}
+				});
+				if (innoculateItemArray.length > 0) {
+					innoculateItemCode = innoculateItemArray[0].ItemCode;
+				}
 				if (invTraDesDataEntry.length > 0) {
 					if (sObj.ItemCode === invTraDesDataEntry[invTraDesDataEntry.length - 1].DocumentLines[0].ItemCode) {
 						invTraDesDataEntry[invTraDesDataEntry.length - 1].DocumentLines.push({
 							"LineNum": invTraDesDataEntry[invTraDesDataEntry.length - 1].DocumentLines[invTraDesDataEntry[invTraDesDataEntry.length -
 									1].DocumentLines.length -
 								1].LineNum + 1,
-							"ItemCode": cannabisItemCode,
+							"ItemCode": innoculateItemCode,
 							"Quantity": 1,
-							"WarehouseCode": locationID,
+							"WarehouseCode": sObj.WhsCode,
 							"BatchNumbers": []
 						});
 						invTraDesDataEntry[invTraDesDataEntry.length - 1].DocumentLines[invTraDesDataEntry[invTraDesDataEntry.length - 1].DocumentLines
@@ -381,8 +386,9 @@ sap.ui.define([
 							.push({
 								"BatchNumber": sObj.BatchNum,
 								"Quantity": 1,
-								"Location": locationID,
-								"U_Phase": "PhenoSVeg",
+								"Location": sObj.WhsCode,
+								//"U_Phase": "MP_Multiply",
+								"U_Phase": U_Phase,
 								"ManufacturerSerialNumber": sObj.MnfSerial,
 								"InternalSerialNumber": sObj.IntrSerial,
 							});
@@ -393,14 +399,14 @@ sap.ui.define([
 							"DocDueDate": createdDate,
 							"DocumentLines": [{
 								"LineNum": 0,
-								"ItemCode": cannabisItemCode,
-								"WarehouseCode": locationID,
+								"ItemCode": innoculateItemCode,
+								"WarehouseCode": sObj.WhsCode,
 								"Quantity": 1,
 								"BatchNumbers": [{
 									"BatchNumber": sObj.BatchNum,
 									"Quantity": 1,
-									"Location": locationID,
-									"U_Phase": "PhenoSVeg",
+									"Location": sObj.WhsCode,
+									"U_Phase": U_Phase,
 									"ManufacturerSerialNumber": sObj.MnfSerial,
 									"InternalSerialNumber": sObj.IntrSerial,
 								}]
@@ -415,14 +421,14 @@ sap.ui.define([
 						"DocDueDate": createdDate,
 						"DocumentLines": [{
 							"LineNum": 0,
-							"ItemCode": cannabisItemCode,
-							"WarehouseCode": locationID,
+							"ItemCode": innoculateItemCode,
+							"WarehouseCode": sObj.WhsCode,
 							"Quantity": 1,
 							"BatchNumbers": [{
 								"BatchNumber": sObj.BatchNum,
 								"Quantity": 1,
-								"Location": locationID,
-								"U_Phase": "PhenoSVeg",
+								"Location": sObj.WhsCode,
+								"U_Phase": U_Phase,
 								"ManufacturerSerialNumber": sObj.MnfSerial,
 								"InternalSerialNumber": sObj.IntrSerial,
 							}]
@@ -431,7 +437,6 @@ sap.ui.define([
 					invTraDesDataEntry.push(payLoadInventory);
 				}
 			});
-
 			$.grep(invTraDesDataEntry, function (invTransObjEntry) {
 				batchUrl.push({
 					url: "/b1s/v2/InventoryGenEntries",
@@ -503,31 +508,796 @@ sap.ui.define([
 					method: "POST"
 				});
 			});
-
+			//return;
 			jsonModel.setProperty("/errorTxt", []);
 			this.createBatchCall(batchUrl, function () {
 				var errorTxt = jsonModel.getProperty("/errorTxt");
 				if (errorTxt.length > 0) {
 					sap.m.MessageBox.error(errorTxt.join("\n"));
 				} else {
-					sap.m.MessageToast.show("Selected plants are moved to Vegetative");
+					sap.m.MessageToast.show("Selected plants are moved to Stem VM");
 				}
-				that.changeGrowthPhaseDialog.close();
-				that.changeGrowthPhaseDialog.setBusy(false);
+				that.InnoculateGrowthPhaseDialog.close();
+				that.InnoculateGrowthPhaseDialog.setBusy(false);
 				that.clearData();
 				that.loadStrainData();
 				that.byId("microPropagationTable").setSelectedIndex(-1);
-			}, this.changeGrowthPhaseDialog);
+			}, this.InnoculateGrowthPhaseDialog);
 		},
-		/***method end for change growth phase***/
 
-		/*method for destroy the plants start*/
+		//method for Record Callus
+		onRecordCallus: function () {
+			var jsonModel = this.getOwnerComponent().getModel("jsonModel");
+			var sItems, that = this;
+			var updateObject;
+			var table = this.getView().byId("microPropagationTable");
+			sItems = table.getSelectedIndices();
+			if (sItems.length > 0) {
+				updateObject = table.getContextByIndex(sItems[0]).getObject();
+				if (updateObject.ItemName.search("Stem VM") !== -1) {
+					if (!this.callusGrowthPhaseDialog) {
+						this.callusGrowthPhaseDialog = sap.ui.xmlfragment("callusGrowthPhaseDialog",
+							"com.9b.MicroPropagation.view.fragments.CallusGrowthPhase", this);
+						this.getView().addDependent(this.callusGrowthPhaseDialog);
+					}
+					sap.ui.core.Fragment.byId("callusGrowthPhaseDialog", "avalQty").setValue(sItems.length);
+					//sap.ui.core.Fragment.byId("callusGrowthPhaseDialog", "location").setSelectedKey("");
+					sap.ui.core.Fragment.byId("callusGrowthPhaseDialog", "mDate").setDateValue(new Date());
+					this.callusGrowthPhaseDialog.open();
+					this.loadCallusItems(updateObject);
+				} else {
+					sap.m.MessageToast.show("You can not change the growth phase of this plant");
+					return;
+				}
+			} else {
+				sap.m.MessageToast.show("Please select atleast one plant");
+			}
+		},
+		loadCallusItems: function (updateObject) {
+			var cannabisItemArray = [];
+			var jsonModel = this.getOwnerComponent().getModel("jsonModel");
+			var filters4 = "?$filter=U_NLFID eq " + "'" + jsonModel.getProperty("/selectedLicense") + "' and ItemsGroupCode eq 109";
+			var fields4 = "&$select=" + ["ItemName", "ItemsGroupCode", "ItemCode", "U_NLFID"].join();
+			this.readServiecLayer("/b1s/v2/Items" + filters4 + fields4, function (data) {
+				jsonModel.setProperty("/CalluseItemsList", data.value);
+				var strainName = updateObject.ItemName.split(" - ")[0];
+				$.each(data.value, function (i, e2) {
+					if (e2.ItemName === strainName + " - " + "Callus") {
+						cannabisItemArray.push(e2);
+					}
+				});
+				if (cannabisItemArray.length > 0) {
+					var cannabisItemCode = cannabisItemArray[0].ItemCode;
+				}
+				sap.ui.core.Fragment.byId("callusGrowthPhaseDialog", "Item").setSelectedKey(cannabisItemCode);
+			});
+		},
+		CalluseClose: function () {
+			this.callusGrowthPhaseDialog.close();
+		},
+		CallusGrowthPhase: function () {
+			var jsonModel = this.getOwnerComponent().getModel("jsonModel");
+			var table = this.getView().byId("microPropagationTable");
+			var vRoom = sap.ui.core.Fragment.byId("callusGrowthPhaseDialog", "growthPhase").getSelectedKey();
+			//var locationID = sap.ui.core.Fragment.byId("callusGrowthPhaseDialog", "location").getSelectedKey();
+			var createDate = sap.ui.core.Fragment.byId("callusGrowthPhaseDialog", "mDate").getDateValue();
+			var dateFormat = DateFormat.getDateInstance({
+				pattern: "yyyy-MM-dd"
+			});
+			var createdDate = dateFormat.format(createDate);
+			// if (locationID === "") {
+			// 	sap.m.MessageToast.show("Please select Location");
+			// 	return;
+			// }
+			var that = this;
+			var sItems = table.getSelectedIndices();
+
+			//inventory entry to seedling item
+			var CalluseItemsList = jsonModel.getProperty("/CalluseItemsList");
+			var innoculateItemArray = [],
+				invTraDesDataEntry = [],
+				batchUrl = [];
+			var sObj, payLoadInventory, innoculateItemCode;
+
+			//inventory entry to Item
+			$.each(sItems, function (i, e) {
+				sObj = table.getContextByIndex(e).getObject();
+				var itemName = sObj.ItemName;
+				var strainName = itemName.split(" - ")[0];
+				$.each(CalluseItemsList, function (i, e2) {
+					if (e2.ItemName === strainName + " - " + "Callus") {
+						innoculateItemArray.push(e2);
+					}
+				});
+				if (innoculateItemArray.length > 0) {
+					innoculateItemCode = innoculateItemArray[0].ItemCode;
+				}
+				if (invTraDesDataEntry.length > 0) {
+					if (sObj.ItemCode === invTraDesDataEntry[invTraDesDataEntry.length - 1].DocumentLines[0].ItemCode) {
+						invTraDesDataEntry[invTraDesDataEntry.length - 1].DocumentLines.push({
+							"LineNum": invTraDesDataEntry[invTraDesDataEntry.length - 1].DocumentLines[invTraDesDataEntry[invTraDesDataEntry.length -
+									1].DocumentLines.length -
+								1].LineNum + 1,
+							"ItemCode": innoculateItemCode,
+							"Quantity": 1,
+							"WarehouseCode": sObj.WhsCode,
+							"BatchNumbers": []
+						});
+						invTraDesDataEntry[invTraDesDataEntry.length - 1].DocumentLines[invTraDesDataEntry[invTraDesDataEntry.length - 1].DocumentLines
+								.length - 1].BatchNumbers
+							.push({
+								"BatchNumber": sObj.BatchNum,
+								"Quantity": 1,
+								"Location": sObj.WhsCode,
+								"U_Phase": "MP_Multiply",
+								"ManufacturerSerialNumber": sObj.MnfSerial,
+								"InternalSerialNumber": sObj.IntrSerial,
+							});
+					} else {
+						payLoadInventory = {
+							"BPL_IDAssignedToInvoice": jsonModel.getProperty("/sLinObj").U_NBRCD,
+							"DocDate": createdDate,
+							"DocDueDate": createdDate,
+							"DocumentLines": [{
+								"LineNum": 0,
+								"ItemCode": innoculateItemCode,
+								"WarehouseCode": sObj.WhsCode,
+								"Quantity": 1,
+								"BatchNumbers": [{
+									"BatchNumber": sObj.BatchNum,
+									"Quantity": 1,
+									"Location": sObj.WhsCode,
+									"U_Phase": "MP_Multiply",
+									"ManufacturerSerialNumber": sObj.MnfSerial,
+									"InternalSerialNumber": sObj.IntrSerial,
+								}]
+							}]
+						};
+						invTraDesDataEntry.push(payLoadInventory);
+					}
+				} else {
+					payLoadInventory = {
+						"BPL_IDAssignedToInvoice": jsonModel.getProperty("/sLinObj").U_NBRCD,
+						"DocDate": createdDate,
+						"DocDueDate": createdDate,
+						"DocumentLines": [{
+							"LineNum": 0,
+							"ItemCode": innoculateItemCode,
+							"WarehouseCode": sObj.WhsCode,
+							"Quantity": 1,
+							"BatchNumbers": [{
+								"BatchNumber": sObj.BatchNum,
+								"Quantity": 1,
+								"Location": sObj.WhsCode,
+								"U_Phase": "MP_Multiply",
+								"ManufacturerSerialNumber": sObj.MnfSerial,
+								"InternalSerialNumber": sObj.IntrSerial,
+							}]
+						}]
+					};
+					invTraDesDataEntry.push(payLoadInventory);
+				}
+			});
+			$.grep(invTraDesDataEntry, function (invTransObjEntry) {
+				batchUrl.push({
+					url: "/b1s/v2/InventoryGenEntries",
+					data: invTransObjEntry,
+					method: "POST"
+				});
+			});
+
+			//inventory exit to selected Item
+			var invTraDesData = [];
+			$.each(sItems, function (i, e) {
+				sObj = table.getContextByIndex(e).getObject();
+				if (invTraDesData.length > 0) {
+					if (sObj.ItemCode === invTraDesData[invTraDesData.length - 1].DocumentLines[0].ItemCode) {
+						invTraDesData[invTraDesData.length - 1].DocumentLines.push({
+							"LineNum": invTraDesData[invTraDesData.length - 1].DocumentLines[invTraDesData[invTraDesData.length - 1].DocumentLines.length -
+								1].LineNum + 1,
+							"ItemCode": sObj.ItemCode,
+							"Quantity": 1,
+							"WarehouseCode": sObj.WhsCode,
+							"BatchNumbers": []
+						});
+						invTraDesData[invTraDesData.length - 1].DocumentLines[invTraDesData[invTraDesData.length - 1].DocumentLines.length - 1].BatchNumbers
+							.push({
+								"BatchNumber": sObj.BatchNum,
+								"Quantity": 1,
+								"Location": sObj.WhsCode
+							});
+					} else {
+						payLoadInventory = {
+							"BPL_IDAssignedToInvoice": jsonModel.getProperty("/sLinObj").U_NBRCD,
+							"DocumentLines": [{
+								"LineNum": 0,
+								"ItemCode": sObj.ItemCode,
+								"WarehouseCode": sObj.WhsCode,
+								"Quantity": 1,
+								"BatchNumbers": [{
+									"BatchNumber": sObj.BatchNum,
+									"Quantity": 1,
+									"Location": sObj.WhsCode
+								}]
+							}]
+						};
+						invTraDesData.push(payLoadInventory);
+					}
+				} else {
+					payLoadInventory = {
+						"BPL_IDAssignedToInvoice": jsonModel.getProperty("/sLinObj").U_NBRCD,
+						"DocumentLines": [{
+							"LineNum": 0,
+							"ItemCode": sObj.ItemCode,
+							"WarehouseCode": sObj.WhsCode,
+							"Quantity": 1,
+							"BatchNumbers": [{
+								"BatchNumber": sObj.BatchNum,
+								"Quantity": 1,
+								"Location": sObj.WhsCode
+							}]
+						}]
+					};
+					invTraDesData.push(payLoadInventory);
+				}
+			});
+
+			$.grep(invTraDesData, function (invTransObj) {
+				batchUrl.push({
+					url: "/b1s/v2/InventoryGenExits",
+					data: invTransObj,
+					method: "POST"
+				});
+			});
+			//return;
+			jsonModel.setProperty("/errorTxt", []);
+			this.createBatchCall(batchUrl, function () {
+				var errorTxt = jsonModel.getProperty("/errorTxt");
+				if (errorTxt.length > 0) {
+					sap.m.MessageBox.error(errorTxt.join("\n"));
+				} else {
+					sap.m.MessageToast.show("Selected plants are moved to Callus");
+				}
+				that.callusGrowthPhaseDialog.close();
+				that.callusGrowthPhaseDialog.setBusy(false);
+				that.clearData();
+				that.loadStrainData();
+				that.byId("microPropagationTable").setSelectedIndex(-1);
+			}, this.callusGrowthPhaseDialog);
+		},
+
+		//method for Diff Callus
+		onRecordDiffCallus: function () {
+			var jsonModel = this.getOwnerComponent().getModel("jsonModel");
+			var sItems, that = this;
+			var updateObject;
+			var table = this.getView().byId("microPropagationTable");
+			sItems = table.getSelectedIndices();
+			if (sItems.length > 0) {
+				updateObject = table.getContextByIndex(sItems[0]).getObject();
+				if (updateObject.ItemName.search("Callus") !== -1) {
+					if (!this.diffCallusGrowthPhaseDialog) {
+						this.diffCallusGrowthPhaseDialog = sap.ui.xmlfragment("diffCallusGrowthPhaseDialog",
+							"com.9b.MicroPropagation.view.fragments.DiffCallusGrowthPhase", this);
+						this.getView().addDependent(this.diffCallusGrowthPhaseDialog);
+					}
+					sap.ui.core.Fragment.byId("diffCallusGrowthPhaseDialog", "avalQty").setValue(sItems.length);
+					//sap.ui.core.Fragment.byId("diffCallusGrowthPhaseDialog", "location").setSelectedKey("");
+					sap.ui.core.Fragment.byId("diffCallusGrowthPhaseDialog", "mDate").setDateValue(new Date());
+					this.diffCallusGrowthPhaseDialog.open();
+					this.loadDiffCallusItems(updateObject);
+				} else {
+					sap.m.MessageToast.show("You can not change the growth phase of this plant");
+					return;
+				}
+			} else {
+				sap.m.MessageToast.show("Please select atleast one plant");
+			}
+		},
+		loadDiffCallusItems: function (updateObject) {
+			var cannabisItemArray = [];
+			var jsonModel = this.getOwnerComponent().getModel("jsonModel");
+			var filters4 = "?$filter=U_NLFID eq " + "'" + jsonModel.getProperty("/selectedLicense") + "' and ItemsGroupCode eq 109";
+			var fields4 = "&$select=" + ["ItemName", "ItemsGroupCode", "ItemCode", "U_NLFID"].join();
+			this.readServiecLayer("/b1s/v2/Items" + filters4 + fields4, function (data) {
+				jsonModel.setProperty("/DiffCalluseItemsList", data.value);
+				var strainName = updateObject.ItemName.split(" - ")[0];
+				$.each(data.value, function (i, e2) {
+					if (e2.ItemName === strainName + " - " + "DIF Callus") {
+						cannabisItemArray.push(e2);
+					}
+				});
+				if (cannabisItemArray.length > 0) {
+					var cannabisItemCode = cannabisItemArray[0].ItemCode;
+				}
+				sap.ui.core.Fragment.byId("diffCallusGrowthPhaseDialog", "Item").setSelectedKey(cannabisItemCode);
+			});
+		},
+		DiffCalluseClose: function () {
+			this.diffCallusGrowthPhaseDialog.close();
+		},
+		DiffCallusGrowthPhase: function () {
+			var jsonModel = this.getOwnerComponent().getModel("jsonModel");
+			var table = this.getView().byId("microPropagationTable");
+			var vRoom = sap.ui.core.Fragment.byId("diffCallusGrowthPhaseDialog", "growthPhase").getSelectedKey();
+			//var locationID = sap.ui.core.Fragment.byId("diffCallusGrowthPhaseDialog", "location").getSelectedKey();
+			var createDate = sap.ui.core.Fragment.byId("diffCallusGrowthPhaseDialog", "mDate").getDateValue();
+			var dateFormat = DateFormat.getDateInstance({
+				pattern: "yyyy-MM-dd"
+			});
+			var createdDate = dateFormat.format(createDate);
+			// if (locationID === "") {
+			// 	sap.m.MessageToast.show("Please select Location");
+			// 	return;
+			// }
+			var that = this;
+			var sItems = table.getSelectedIndices();
+
+			//inventory entry to seedling item
+			var DiffCalluseItemsList = jsonModel.getProperty("/DiffCalluseItemsList");
+			var innoculateItemArray = [],
+				invTraDesDataEntry = [],
+				batchUrl = [];
+			var sObj, payLoadInventory, innoculateItemCode;
+
+			//inventory entry to Item
+			$.each(sItems, function (i, e) {
+				sObj = table.getContextByIndex(e).getObject();
+				var itemName = sObj.ItemName;
+				var strainName = itemName.split(" - ")[0];
+				$.each(DiffCalluseItemsList, function (i, e2) {
+					if (e2.ItemName === strainName + " - " + "DIF Callus") {
+						innoculateItemArray.push(e2);
+					}
+				});
+				if (innoculateItemArray.length > 0) {
+					innoculateItemCode = innoculateItemArray[0].ItemCode;
+				}
+				if (invTraDesDataEntry.length > 0) {
+					if (sObj.ItemCode === invTraDesDataEntry[invTraDesDataEntry.length - 1].DocumentLines[0].ItemCode) {
+						invTraDesDataEntry[invTraDesDataEntry.length - 1].DocumentLines.push({
+							"LineNum": invTraDesDataEntry[invTraDesDataEntry.length - 1].DocumentLines[invTraDesDataEntry[invTraDesDataEntry.length -
+									1].DocumentLines.length -
+								1].LineNum + 1,
+							"ItemCode": innoculateItemCode,
+							"Quantity": 1,
+							"WarehouseCode": sObj.WhsCode,
+							"BatchNumbers": []
+						});
+						invTraDesDataEntry[invTraDesDataEntry.length - 1].DocumentLines[invTraDesDataEntry[invTraDesDataEntry.length - 1].DocumentLines
+								.length - 1].BatchNumbers
+							.push({
+								"BatchNumber": sObj.BatchNum,
+								"Quantity": 1,
+								"Location": sObj.WhsCode,
+								"U_Phase": "MP_Multiply",
+								"ManufacturerSerialNumber": sObj.MnfSerial,
+								"InternalSerialNumber": sObj.IntrSerial,
+							});
+					} else {
+						payLoadInventory = {
+							"BPL_IDAssignedToInvoice": jsonModel.getProperty("/sLinObj").U_NBRCD,
+							"DocDate": createdDate,
+							"DocDueDate": createdDate,
+							"DocumentLines": [{
+								"LineNum": 0,
+								"ItemCode": innoculateItemCode,
+								"WarehouseCode": sObj.WhsCode,
+								"Quantity": 1,
+								"BatchNumbers": [{
+									"BatchNumber": sObj.BatchNum,
+									"Quantity": 1,
+									"Location": sObj.WhsCode,
+									"U_Phase": "MP_Multiply",
+									"ManufacturerSerialNumber": sObj.MnfSerial,
+									"InternalSerialNumber": sObj.IntrSerial,
+								}]
+							}]
+						};
+						invTraDesDataEntry.push(payLoadInventory);
+					}
+				} else {
+					payLoadInventory = {
+						"BPL_IDAssignedToInvoice": jsonModel.getProperty("/sLinObj").U_NBRCD,
+						"DocDate": createdDate,
+						"DocDueDate": createdDate,
+						"DocumentLines": [{
+							"LineNum": 0,
+							"ItemCode": innoculateItemCode,
+							"WarehouseCode": sObj.WhsCode,
+							"Quantity": 1,
+							"BatchNumbers": [{
+								"BatchNumber": sObj.BatchNum,
+								"Quantity": 1,
+								"Location": sObj.WhsCode,
+								"U_Phase": "MP_Multiply",
+								"ManufacturerSerialNumber": sObj.MnfSerial,
+								"InternalSerialNumber": sObj.IntrSerial,
+							}]
+						}]
+					};
+					invTraDesDataEntry.push(payLoadInventory);
+				}
+			});
+			$.grep(invTraDesDataEntry, function (invTransObjEntry) {
+				batchUrl.push({
+					url: "/b1s/v2/InventoryGenEntries",
+					data: invTransObjEntry,
+					method: "POST"
+				});
+			});
+
+			//inventory exit to selected Item
+			var invTraDesData = [];
+			$.each(sItems, function (i, e) {
+				sObj = table.getContextByIndex(e).getObject();
+				if (invTraDesData.length > 0) {
+					if (sObj.ItemCode === invTraDesData[invTraDesData.length - 1].DocumentLines[0].ItemCode) {
+						invTraDesData[invTraDesData.length - 1].DocumentLines.push({
+							"LineNum": invTraDesData[invTraDesData.length - 1].DocumentLines[invTraDesData[invTraDesData.length - 1].DocumentLines.length -
+								1].LineNum + 1,
+							"ItemCode": sObj.ItemCode,
+							"Quantity": 1,
+							"WarehouseCode": sObj.WhsCode,
+							"BatchNumbers": []
+						});
+						invTraDesData[invTraDesData.length - 1].DocumentLines[invTraDesData[invTraDesData.length - 1].DocumentLines.length - 1].BatchNumbers
+							.push({
+								"BatchNumber": sObj.BatchNum,
+								"Quantity": 1,
+								"Location": sObj.WhsCode
+							});
+					} else {
+						payLoadInventory = {
+							"BPL_IDAssignedToInvoice": jsonModel.getProperty("/sLinObj").U_NBRCD,
+							"DocumentLines": [{
+								"LineNum": 0,
+								"ItemCode": sObj.ItemCode,
+								"WarehouseCode": sObj.WhsCode,
+								"Quantity": 1,
+								"BatchNumbers": [{
+									"BatchNumber": sObj.BatchNum,
+									"Quantity": 1,
+									"Location": sObj.WhsCode
+								}]
+							}]
+						};
+						invTraDesData.push(payLoadInventory);
+					}
+				} else {
+					payLoadInventory = {
+						"BPL_IDAssignedToInvoice": jsonModel.getProperty("/sLinObj").U_NBRCD,
+						"DocumentLines": [{
+							"LineNum": 0,
+							"ItemCode": sObj.ItemCode,
+							"WarehouseCode": sObj.WhsCode,
+							"Quantity": 1,
+							"BatchNumbers": [{
+								"BatchNumber": sObj.BatchNum,
+								"Quantity": 1,
+								"Location": sObj.WhsCode
+							}]
+						}]
+					};
+					invTraDesData.push(payLoadInventory);
+				}
+			});
+
+			$.grep(invTraDesData, function (invTransObj) {
+				batchUrl.push({
+					url: "/b1s/v2/InventoryGenExits",
+					data: invTransObj,
+					method: "POST"
+				});
+			});
+			//return;
+			jsonModel.setProperty("/errorTxt", []);
+			this.createBatchCall(batchUrl, function () {
+				var errorTxt = jsonModel.getProperty("/errorTxt");
+				if (errorTxt.length > 0) {
+					sap.m.MessageBox.error(errorTxt.join("\n"));
+				} else {
+					sap.m.MessageToast.show("Selected plants are moved to Diff Callus");
+				}
+				that.diffCallusGrowthPhaseDialog.close();
+				that.diffCallusGrowthPhaseDialog.setBusy(false);
+				that.clearData();
+				that.loadStrainData();
+				that.byId("microPropagationTable").setSelectedIndex(-1);
+			}, this.diffCallusGrowthPhaseDialog);
+		},
+
+		//method for mark as clone
+		markAsClones: function () {
+			var jsonModel = this.getOwnerComponent().getModel("jsonModel");
+			var sItems, that = this;
+			var updateObject;
+			var table = this.getView().byId("microPropagationTable");
+			sItems = table.getSelectedIndices();
+			if (sItems.length > 0) {
+				updateObject = table.getContextByIndex(sItems[0]).getObject();
+				if (updateObject.ItemName.search("DIF Callus") !== -1) {
+					if (!this.createCloneDialog) {
+						this.createCloneDialog = sap.ui.xmlfragment("createCloneDialog",
+							"com.9b.MicroPropagation.view.fragments.CreateClone", this);
+						this.getView().addDependent(this.createCloneDialog);
+					}
+					sap.ui.core.Fragment.byId("createCloneDialog", "avalQty").setValue(sItems.length);
+					//sap.ui.core.Fragment.byId("createCloneDialog", "location").setSelectedKey("");
+					sap.ui.core.Fragment.byId("createCloneDialog", "mDate").setDateValue(new Date());
+					this.createCloneDialog.open();
+					this.loadCloneItems(updateObject);
+				} else {
+					sap.m.MessageToast.show("You can not change the growth phase of this plant");
+					return;
+				}
+			} else {
+				sap.m.MessageToast.show("Please select atleast one plant");
+			}
+		},
+		loadCloneItems: function (updateObject) {
+			var cannabisItemArray = [];
+			var jsonModel = this.getOwnerComponent().getModel("jsonModel");
+			var filters4 = "?$filter=U_NLFID eq " + "'" + jsonModel.getProperty("/selectedLicense") + "' and ItemsGroupCode eq 109";
+			var fields4 = "&$select=" + ["ItemName", "ItemsGroupCode", "ItemCode", "U_NLFID"].join();
+			this.readServiecLayer("/b1s/v2/Items" + filters4 + fields4, function (data) {
+				jsonModel.setProperty("/CloneItemsList", data.value);
+				var strainName = updateObject.ItemName.split(" - ")[0];
+				$.each(data.value, function (i, e2) {
+					if (e2.ItemName === strainName + " - " + "Clone") {
+						cannabisItemArray.push(e2);
+					}
+				});
+				if (cannabisItemArray.length > 0) {
+					var cannabisItemCode = cannabisItemArray[0].ItemCode;
+				}
+				sap.ui.core.Fragment.byId("createCloneDialog", "Item").setSelectedKey(cannabisItemCode);
+			});
+		},
+		onCloneClose: function () {
+			this.createCloneDialog.close();
+		},
+		onCloneCreate: function () {
+			var jsonModel = this.getOwnerComponent().getModel("jsonModel");
+			var table = this.getView().byId("microPropagationTable");
+			var Phase = sap.ui.core.Fragment.byId("createCloneDialog", "phase").getSelectedKey();
+			//var locationID = sap.ui.core.Fragment.byId("createCloneDialog", "location").getSelectedKey();
+			var createDate = sap.ui.core.Fragment.byId("createCloneDialog", "mDate").getDateValue();
+			var dateFormat = DateFormat.getDateInstance({
+				pattern: "yyyy-MM-dd"
+			});
+			var createdDate = dateFormat.format(createDate);
+			if (Phase === "") {
+				sap.m.MessageToast.show("Please select Phase");
+				return;
+			}
+			var that = this;
+			var sItems = table.getSelectedIndices();
+
+			//inventory entry to seedling item
+			var CloneItemsList = jsonModel.getProperty("/CloneItemsList");
+			var innoculateItemArray = [],
+				invTraDesDataEntry = [],
+				batchUrl = [];
+			var sObj, payLoadInventory, innoculateItemCode;
+
+			//inventory entry to Item
+			$.each(sItems, function (i, e) {
+				sObj = table.getContextByIndex(e).getObject();
+				var itemName = sObj.ItemName;
+				var strainName = itemName.split(" - ")[0];
+				$.each(CloneItemsList, function (i, e2) {
+					if (e2.ItemName === strainName + " - " + "Clone") {
+						innoculateItemArray.push(e2);
+					}
+				});
+				if (innoculateItemArray.length > 0) {
+					innoculateItemCode = innoculateItemArray[0].ItemCode;
+				}
+				if (invTraDesDataEntry.length > 0) {
+					if (sObj.ItemCode === invTraDesDataEntry[invTraDesDataEntry.length - 1].DocumentLines[0].ItemCode) {
+						invTraDesDataEntry[invTraDesDataEntry.length - 1].DocumentLines.push({
+							"LineNum": invTraDesDataEntry[invTraDesDataEntry.length - 1].DocumentLines[invTraDesDataEntry[invTraDesDataEntry.length -
+									1].DocumentLines.length -
+								1].LineNum + 1,
+							"ItemCode": innoculateItemCode,
+							"Quantity": 1,
+							"WarehouseCode": sObj.WhsCode,
+							"BatchNumbers": []
+						});
+						invTraDesDataEntry[invTraDesDataEntry.length - 1].DocumentLines[invTraDesDataEntry[invTraDesDataEntry.length - 1].DocumentLines
+								.length - 1].BatchNumbers
+							.push({
+								"BatchNumber": sObj.BatchNum,
+								"Quantity": 1,
+								"Location": sObj.WhsCode,
+								"U_Phase": Phase,
+								"ManufacturerSerialNumber": sObj.MnfSerial,
+								"InternalSerialNumber": sObj.IntrSerial,
+							});
+					} else {
+						payLoadInventory = {
+							"BPL_IDAssignedToInvoice": jsonModel.getProperty("/sLinObj").U_NBRCD,
+							"DocDate": createdDate,
+							"DocDueDate": createdDate,
+							"DocumentLines": [{
+								"LineNum": 0,
+								"ItemCode": innoculateItemCode,
+								"WarehouseCode": sObj.WhsCode,
+								"Quantity": 1,
+								"BatchNumbers": [{
+									"BatchNumber": sObj.BatchNum,
+									"Quantity": 1,
+									"Location": sObj.WhsCode,
+									"U_Phase": Phase,
+									"ManufacturerSerialNumber": sObj.MnfSerial,
+									"InternalSerialNumber": sObj.IntrSerial,
+								}]
+							}]
+						};
+						invTraDesDataEntry.push(payLoadInventory);
+					}
+				} else {
+					payLoadInventory = {
+						"BPL_IDAssignedToInvoice": jsonModel.getProperty("/sLinObj").U_NBRCD,
+						"DocDate": createdDate,
+						"DocDueDate": createdDate,
+						"DocumentLines": [{
+							"LineNum": 0,
+							"ItemCode": innoculateItemCode,
+							"WarehouseCode": sObj.WhsCode,
+							"Quantity": 1,
+							"BatchNumbers": [{
+								"BatchNumber": sObj.BatchNum,
+								"Quantity": 1,
+								"Location": sObj.WhsCode,
+								"U_Phase": Phase,
+								"ManufacturerSerialNumber": sObj.MnfSerial,
+								"InternalSerialNumber": sObj.IntrSerial,
+							}]
+						}]
+					};
+					invTraDesDataEntry.push(payLoadInventory);
+				}
+			});
+			$.grep(invTraDesDataEntry, function (invTransObjEntry) {
+				batchUrl.push({
+					url: "/b1s/v2/InventoryGenEntries",
+					data: invTransObjEntry,
+					method: "POST"
+				});
+			});
+
+			//inventory exit to selected Item
+			var invTraDesData = [];
+			$.each(sItems, function (i, e) {
+				sObj = table.getContextByIndex(e).getObject();
+				if (invTraDesData.length > 0) {
+					if (sObj.ItemCode === invTraDesData[invTraDesData.length - 1].DocumentLines[0].ItemCode) {
+						invTraDesData[invTraDesData.length - 1].DocumentLines.push({
+							"LineNum": invTraDesData[invTraDesData.length - 1].DocumentLines[invTraDesData[invTraDesData.length - 1].DocumentLines.length -
+								1].LineNum + 1,
+							"ItemCode": sObj.ItemCode,
+							"Quantity": 1,
+							"WarehouseCode": sObj.WhsCode,
+							"BatchNumbers": []
+						});
+						invTraDesData[invTraDesData.length - 1].DocumentLines[invTraDesData[invTraDesData.length - 1].DocumentLines.length - 1].BatchNumbers
+							.push({
+								"BatchNumber": sObj.BatchNum,
+								"Quantity": 1,
+								"Location": sObj.WhsCode
+							});
+					} else {
+						payLoadInventory = {
+							"BPL_IDAssignedToInvoice": jsonModel.getProperty("/sLinObj").U_NBRCD,
+							"DocumentLines": [{
+								"LineNum": 0,
+								"ItemCode": sObj.ItemCode,
+								"WarehouseCode": sObj.WhsCode,
+								"Quantity": 1,
+								"BatchNumbers": [{
+									"BatchNumber": sObj.BatchNum,
+									"Quantity": 1,
+									"Location": sObj.WhsCode
+								}]
+							}]
+						};
+						invTraDesData.push(payLoadInventory);
+					}
+				} else {
+					payLoadInventory = {
+						"BPL_IDAssignedToInvoice": jsonModel.getProperty("/sLinObj").U_NBRCD,
+						"DocumentLines": [{
+							"LineNum": 0,
+							"ItemCode": sObj.ItemCode,
+							"WarehouseCode": sObj.WhsCode,
+							"Quantity": 1,
+							"BatchNumbers": [{
+								"BatchNumber": sObj.BatchNum,
+								"Quantity": 1,
+								"Location": sObj.WhsCode
+							}]
+						}]
+					};
+					invTraDesData.push(payLoadInventory);
+				}
+			});
+
+			$.grep(invTraDesData, function (invTransObj) {
+				batchUrl.push({
+					url: "/b1s/v2/InventoryGenExits",
+					data: invTransObj,
+					method: "POST"
+				});
+			});
+			//return;
+			jsonModel.setProperty("/errorTxt", []);
+			this.createBatchCall(batchUrl, function () {
+				var errorTxt = jsonModel.getProperty("/errorTxt");
+				if (errorTxt.length > 0) {
+					sap.m.MessageBox.error(errorTxt.join("\n"));
+				} else {
+					sap.m.MessageToast.show("Clone Created Successfully");
+				}
+				that.createCloneDialog.close();
+				that.createCloneDialog.setBusy(false);
+				that.clearData();
+				that.loadStrainData();
+				that.byId("microPropagationTable").setSelectedIndex(-1);
+			}, this.createCloneDialog);
+		},
+		/***methods end for sed for Multiplication tab***/
+
+		/***method start for Storage***/
+		sendToMultiplication: function () {
+			var that = this;
+			var jsonModel = that.getOwnerComponent().getModel("jsonModel");
+			var sItems;
+			var microPropagationTable = this.getView().byId("microPropagationTable");
+			sItems = microPropagationTable.getSelectedIndices();
+			if (sItems.length > 0) {
+				sap.m.MessageBox.confirm("Are you sure you want to move these plants for Multiplication ?", {
+					onClose: function (action) {
+						if (action === "OK") {
+							var sObj, batchUrl = [];
+							$.each(sItems, function (i, e) {
+								sObj = microPropagationTable.getContextByIndex(e).getObject();
+								var payLoadInventoryEntry = {
+									U_Phase: "MP_Multiply"
+								};
+								batchUrl.push({
+									url: "/b1s/v2/BatchNumberDetails(" + sObj.AbsEntry + ")",
+									data: payLoadInventoryEntry,
+									method: "PATCH"
+								});
+							});
+							jsonModel.setProperty("/errorTxt", []);
+							that.createBatchCall(batchUrl, function () {
+								var errorTxt = jsonModel.getProperty("/errorTxt");
+								if (errorTxt.length > 0) {
+									sap.m.MessageBox.error(errorTxt.join("\n"));
+								} else {
+									sap.m.MessageToast.show("Selected plants are moved for Multiplication");
+								}
+								that.loadStrainData();
+								microPropagationTable.setSelectedIndex(-1);
+							});
+						}
+					}
+				});
+			} else {
+				sap.m.MessageToast.show("Please select atleast one plant");
+			}
+		},
+		/***method end for Storage***/
+
+		/*method for destroy plants*/
 		performDestroyPlants: function () {
 			var that = this;
 			var sItems;
 			var table = this.getView().byId("microPropagationTable");
 			sItems = table.getSelectedIndices();
-
 			if (sItems.length > 0) {
 				//check single batch is selected or not
 				var batchIDArray = [];
@@ -744,159 +1514,18 @@ sap.ui.define([
 				sap.m.MessageToast.show("Please select atleast one record");
 			}
 		},
-		/*method for destroy the plants end*/
 
-		/*code for mark as propagation start*/
-
-		/****method for change location start********/
-		changeLocation: function () {
-			var sItems, updateObject;
-			var table = this.getView().byId("microPropagationTable");
-			var jsonModel = this.getOwnerComponent().getModel("jsonModel");
-			sItems = table.getSelectedIndices();
-			if (sItems.length > 0) {
-				updateObject = table.getContextByIndex(sItems[0]).getObject();
-				if (!this.changeLocationDialog) {
-					this.changeLocationDialog = sap.ui.xmlfragment("changeLocationDialog", "com.9b.MicroPropagation.view.fragments.ChangeLocation",
-						this);
-					this.getView().addDependent(this.changeLocationDialog);
-				}
-				sap.ui.core.Fragment.byId("changeLocationDialog", "location").setSelectedKey("");
-
-				if (updateObject.ItemName.search("Seedling") !== -1) {
-					var createSeedlings = jsonModel.getProperty("/createSeedlings");
-					jsonModel.setProperty("/ChangeLocationData", createSeedlings);
-				} else if (updateObject.ItemName.search("Cannabis Plant") !== -1) {
-					var cannabisLocationList = jsonModel.getProperty("/cannabisLocationList");
-					jsonModel.setProperty("/ChangeLocationData", cannabisLocationList);
-				}
-				this.changeLocationDialog.open();
-			} else {
-				sap.m.MessageToast.show("Please select atleast one plant");
+		clearAllFilters: function () {
+			var filterTable = this.getView().byId("microPropagationTable");
+			var aColumns = filterTable.getColumns();
+			for (var i = 0; i <= aColumns.length; i++) {
+				filterTable.filter(aColumns[i], null);
+				filterTable.sort(aColumns[i], null);
 			}
+			this.byId("searchFieldTable").removeAllTokens();
+			this.byId("searchFieldTable1").removeAllTokens();
+			this.byId("searchFieldTable2").removeAllTokens();
 		},
-		onChangeLocationClose: function () {
-			this.changeLocationDialog.close();
-		},
-		onChangeLocation: function () {
-			var jsonModel = this.getOwnerComponent().getModel("jsonModel");
-			var sItems;
-			var that = this;
-			var table = this.getView().byId("microPropagationTable");
-			sItems = table.getSelectedIndices();
-			var locationID = sap.ui.core.Fragment.byId("changeLocationDialog", "location").getSelectedKey();
-			if (locationID == "") {
-				sap.m.MessageToast.show("Please Select Location");
-				return;
-			}
-			var count = sItems.length;
-			var sObj, payLoadUpdate, invTrasData = [],
-				batchUrl = [];
-			$.each(sItems, function (i, e) {
-				var payLoadInventory = {};
-				sObj = table.getContextByIndex(e).getObject();
-				if (sObj.WhsCode == locationID) {
-					sap.m.MessageToast.show("You have selected same location, Please select another location");
-					return;
-				}
-				if (sObj.WhsCode !== locationID) {
-					if (invTrasData.length > 0) {
-						var returntrasObj, returnLines;
-						returntrasObj = $.grep(invTrasData, function (trasObj) {
-							if (trasObj.FromWarehouse === sObj.WhsCode) {
-								return trasObj;
-							}
-						});
-						if (returntrasObj.length > 0) {
-							returnLines = $.grep(returntrasObj[0].StockTransferLines, function (lines) {
-								if (lines.ItemCode === sObj.ItemCode) {
-									return lines;
-								}
-							});
-							if (returnLines.length > 0) {
-								returnLines[0].BatchNumbers.push({
-									"BatchNumberProperty": sObj.BatchNum,
-									"Quantity": 1
-								});
-								returnLines[0].Quantity = returnLines[0].BatchNumbers.length;
-							} else {
-								returntrasObj[0].StockTransferLines.push({
-									"LineNum": returntrasObj[0].StockTransferLines.length,
-									"ItemCode": sObj.ItemCode,
-									"Quantity": 1,
-									"WarehouseCode": locationID,
-									"FromWarehouseCode": sObj.WhsCode,
-									"BatchNumbers": [{
-										"BatchNumberProperty": sObj.BatchNum,
-										"Quantity": 1
-									}]
-								});
-							}
-						} else {
-							payLoadInventory = {
-								"FromWarehouse": sObj.WhsCode,
-								"ToWarehouse": locationID,
-								"BPLID": jsonModel.getProperty("/sLinObj").U_NBRCD,
-								"StockTransferLines": [{
-									"LineNum": 0,
-									"ItemCode": sObj.ItemCode,
-									"Quantity": 1,
-									"WarehouseCode": locationID,
-									"FromWarehouseCode": sObj.WhsCode,
-									"BatchNumbers": [{
-										"BatchNumberProperty": sObj.BatchNum,
-										"Quantity": 1
-									}]
-								}]
-							};
-							invTrasData.push(payLoadInventory);
-						}
-					} else {
-						payLoadInventory = {
-							"FromWarehouse": sObj.WhsCode,
-							"ToWarehouse": locationID,
-							"BPLID": jsonModel.getProperty("/sLinObj").U_NBRCD,
-							"StockTransferLines": [{
-								"LineNum": 0,
-								"ItemCode": sObj.ItemCode,
-								"Quantity": 1,
-								"WarehouseCode": locationID,
-								"FromWarehouseCode": sObj.WhsCode,
-								"BatchNumbers": [{
-									"BatchNumberProperty": sObj.BatchNum,
-									"Quantity": 1
-								}]
-							}]
-						};
-						invTrasData.push(payLoadInventory);
-					}
-				}
-			});
-			$.grep(invTrasData, function (invTransObj) {
-				batchUrl.push({
-					url: "/b1s/v2/StockTransfers",
-					data: invTransObj,
-					method: "POST"
-				});
-			});
-			jsonModel.setProperty("/errorTxt", []);
-			if (batchUrl.length > 0) {
-				this.createBatchCall(batchUrl, function () {
-					var errorTxt = jsonModel.getProperty("/errorTxt");
-					if (errorTxt.length > 0) {
-						sap.m.MessageBox.error(errorTxt.join("\n"));
-					} else {
-						sap.m.MessageToast.show("Plant Location Changed Successfully");
-					}
-					that.changeLocationDialog.close();
-					sap.m.MessageToast.show("Plant Location Changed Successfully");
-					that.loadStrainData();
-					that.byId("microPropagationTable").setSelectedIndex(-1);
-				}, this.changeLocationDialog);
-			}
-		},
-		/****method for change location end********/
-
 		onFilterTable: function (evt) {
 			var customData = evt.getParameter("column").getLabel().getCustomData();
 			if (customData.length > 0 && customData[0].getKey() === "DAYS") {
@@ -905,7 +1534,6 @@ sap.ui.define([
 				this.byId("microPropagationTable").getBinding("rows").filter(filters);
 			}
 		},
-		/*Methods for multiInput for sarch field for scan functionality start*/
 		fillFilterLoad: function (elementC, removedText) {
 			var orFilter = [];
 			var andFilter = [];
@@ -928,29 +1556,11 @@ sap.ui.define([
 			});
 			this.byId("microPropagationTable").getBinding("rows").filter(andFilter);
 		},
-		renderComplete: function (evt) {
-			if (evt.getSource().getParent().getParent().getFullScreen() === false) {
-				evt.getSource().setHeight("8rem");
-			}
-		},
-		onRefreshChart: function () {
-			this.byId("microPropagationTable").setSelectedIndex(-1);
-		},
-
-		onCloseRefreshChart: function () {
-			this.byId("searchFieldTable4").setText("");
-			this.byId("searchFieldTable3").setVisible(false);
-			var cloneTable = this.byId("microPropagationTable");
-			// var cloneList = this.byId("oList");
-			cloneTable.getBinding("rows").filter([]);
-			//cloneList.getBinding("items").filter([]);
-		},
 		clearData: function () {
 			this.byId("microPropagationTable").clearSelection();
 		},
 		onPlantsRefresh: function () {
 			this.clearAllFilters();
-			this.onCloseRefreshChart();
 			this.byId("searchFieldTable").removeAllTokens();
 			this.byId("searchFieldTable1").removeAllTokens();
 			this.byId("searchFieldTable2").removeAllTokens();
