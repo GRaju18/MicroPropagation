@@ -1356,6 +1356,8 @@ sap.ui.define([
 			var notes = sap.ui.core.Fragment.byId("ConfirmDestroyPlant", "notes").getValue();
 			var wRecDate = sap.ui.core.Fragment.byId("ConfirmDestroyPlant", "wRecDate").getValue();
 			var wasteWt = Number(sap.ui.core.Fragment.byId("ConfirmDestroyPlant", "wasteWt").getValue());
+			var plantCount = sItems.length;
+			var weightPerPlant = Number(wasteWt) / plantCount;
 			if (wMethod === "") {
 				sap.m.MessageToast.show("Please select waste method");
 				return;
@@ -1399,7 +1401,8 @@ sap.ui.define([
 						U_NPLID: sObj.BatchNum,
 						U_NWTMT: wMethod,
 						U_NMTUS: matUsed,
-						U_NWTWT: wasteWt.toFixed(2),
+						//U_NWTWT: wasteWt.toFixed(2),
+						U_NWTWT: weightPerPlant.toFixed(2),
 						U_NWTUM: uom,
 						U_NDTRS: reason,
 						U_NNOTE: notes,
