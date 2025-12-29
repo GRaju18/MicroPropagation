@@ -803,7 +803,7 @@ sap.ui.define([
 				jsonModel.setProperty("/DiffCalluseItemsList", data.value);
 				var strainName = updateObject.ItemName.split(" - ")[0];
 				$.each(data.value, function (i, e2) {
-					if (e2.ItemName === strainName + " - " + "DIF Callus") {
+					if (e2.ItemName === strainName + " - " + "Diff Callus") {
 						cannabisItemArray.push(e2);
 					}
 				});
@@ -846,7 +846,7 @@ sap.ui.define([
 				var itemName = sObj.ItemName;
 				var strainName = itemName.split(" - ")[0];
 				$.each(DiffCalluseItemsList, function (i, e2) {
-					if (e2.ItemName === strainName + " - " + "DIF Callus") {
+					if (e2.ItemName === strainName + " - " + "Diff Callus") {
 						innoculateItemArray.push(e2);
 					}
 				});
@@ -1016,7 +1016,7 @@ sap.ui.define([
 			sItems = table.getSelectedIndices();
 			if (sItems.length > 0) {
 				updateObject = table.getContextByIndex(sItems[0]).getObject();
-				if (updateObject.ItemName.search("DIF Callus") !== -1) {
+				if (updateObject.ItemName.search("Diff Callus") !== -1) {
 					if (!this.createCloneDialog) {
 						this.createCloneDialog = sap.ui.xmlfragment("createCloneDialog",
 							"com.9b.MicroPropagation.view.fragments.CreateClone", this);

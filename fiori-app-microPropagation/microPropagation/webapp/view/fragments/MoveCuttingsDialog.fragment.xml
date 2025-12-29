@@ -1,5 +1,6 @@
 <core:FragmentDefinition xmlns="sap.m" xmlns:core="sap.ui.core" xmlns:l="sap.ui.layout">
-	<Dialog id="changeGrowthPhase" contentWidth="28rem" class="sapUiSizeCompact iconDialog waterDialog" stretch="{device>/system/phone}">
+	<Dialog id="changeGrowthPhase" draggable="true" contentWidth="28rem" class="sapUiSizeCompact iconDialog waterDialog"
+		stretch="{device>/system/phone}">
 		<customHeader>
 			<Bar>
 				<contentMiddle>
