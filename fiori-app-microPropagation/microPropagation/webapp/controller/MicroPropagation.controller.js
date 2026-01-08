@@ -22,6 +22,7 @@ sap.ui.define([
 				sap.ui.core.BusyIndicator.hide();
 				this.getView().byId("microPropagationTable").clearSelection();
 				jsonModel.setProperty("/sIconTab", "RECEPTION");
+				jsonModel.setProperty("/isSingleSelect", false);
 				this.loadLicenseData();
 			}
 		},
@@ -155,9 +156,12 @@ sap.ui.define([
 			if (vRoom === "Preservation") {
 				var Phase = "MP_Preserve";
 				var phaseText = "Preservation";
-			} else {
+			} else if (vRoom === "Multiplication") {
 				var Phase = "MP_Multiply";
 				var phaseText = "Multiplication";
+			} else {
+				var Phase = "";
+				var phaseText = "";
 			}
 			$.each(sItems, function (i, e) {
 				sObj = table.getContextByIndex(e).getObject();
@@ -274,6 +278,129 @@ sap.ui.define([
 			}
 		},
 
+		//method for create stemvm
+		createStemVM: function () {
+			var jsonModel = this.getOwnerComponent().getModel("jsonModel");
+			var sItems, that = this;
+			var updateObject;
+			var table = this.getView().byId("microPropagationTable");
+			sItems = table.getSelectedIndices();
+			if (sItems.length > 0) {
+				updateObject = table.getContextByIndex(sItems[0]).getObject();
+				if (!this.createStemVMDialog) {
+					this.createStemVMDialog = sap.ui.xmlfragment("createStemVMDialog",
+						"com.9b.MicroPropagation.view.fragments.CreateStemVM", this);
+					this.getView().addDependent(this.createStemVMDialog);
+				}
+				sap.ui.core.Fragment.byId("createStemVMDialog", "mDate").setDateValue(new Date());
+				this.createStemVMDialog.open();
+				this.loadInnoculateItems(updateObject);
+				this.loadAllData();
+			} else {
+				sap.m.MessageToast.show("Please select atleast one plant");
+			}
+		},
+		loadAllData: function () {
+			var jsonModel = this.getOwnerComponent().getModel("jsonModel");
+			var filters1 = "?$filter=U_MetrcLicense eq " + "'" + jsonModel.getProperty("/selectedLicense") + "' and U_Phase ne 'Seed' ";
+			var cSelect1 = "&$select=BatchNum,IntrSerial";
+			this.readServiecLayer("/b1s/v2/sml.svc/CV_PLANNER_VW" + filters1 + cSelect1, function (data) {
+				jsonModel.setProperty("/allData", data.value);
+			});
+		},
+		StemVMClose: function () {
+			this.createStemVMDialog.close();
+		},
+		StemVMCreate: function () {
+			var jsonModel = this.getOwnerComponent().getModel("jsonModel");
+			var table = this.getView().byId("microPropagationTable");
+			var vRoom = sap.ui.core.Fragment.byId("createStemVMDialog", "growthPhase").getSelectedKey();
+			var createDate = sap.ui.core.Fragment.byId("createStemVMDialog", "mDate").getDateValue();
+			var dateFormat = DateFormat.getDateInstance({
+				pattern: "yyyy-MM-dd"
+			});
+			var createdDate = dateFormat.format(createDate);
+			var that = this;
+			var sItems = table.getSelectedIndices();
+			var cultivationData = jsonModel.getProperty("/allData");
+			//inventory entry to seedling item
+			var InnoculateItemsList = jsonModel.getProperty("/InnoculateItemsList");
+			var innoculateItemArray = [],
+				invTraDesDataEntry = [],
+				batchUrl = [];
+			var sObj, payLoadInventory, innoculateItemCode;
+
+			var d = new Date();
+			var month = '' + (d.getMonth() + 1);
+			var day = '' + d.getDate();
+			var year = d.getFullYear();
+			var uniqueText = year + "" + month + "" + day;
+
+			//inventory entry to Item
+			$.each(sItems, function (i, e) {
+				sObj = table.getContextByIndex(e).getObject();
+				var itemName = sObj.ItemName;
+				var strainName = itemName.split(" - ")[0];
+				var strainCode = strainName.split(":")[0];
+
+				var plantID = that.generateClonePlantID(uniqueText, strainCode, cultivationData);
+				var batchID = that.generateCloneBatchID(uniqueText, strainCode, cultivationData);
+
+				$.each(InnoculateItemsList, function (i, e2) {
+					if (e2.ItemName === strainName + " - " + "Stem VM") {
+						innoculateItemArray.push(e2);
+					}
+				});
+				if (innoculateItemArray.length > 0) {
+					innoculateItemCode = innoculateItemArray[0].ItemCode;
+				}
+				payLoadInventory = {
+					"BPL_IDAssignedToInvoice": jsonModel.getProperty("/sLinObj").U_NBRCD,
+					"DocDate": createdDate,
+					"DocDueDate": createdDate,
+					"DocumentLines": [{
+						"LineNum": 0,
+						"ItemCode": innoculateItemCode,
+						"WarehouseCode": sObj.WhsCode,
+						"Quantity": 1,
+						"BatchNumbers": [{
+							"BatchNumber": plantID, //plant ID
+							"Quantity": 1,
+							"Location": sObj.WhsCode,
+							"U_Phase": "MP_Multiply",
+							"ManufacturerSerialNumber": sObj.BatchNum, //source
+							"InternalSerialNumber": batchID, //batch ID
+						}]
+					}]
+				};
+				invTraDesDataEntry.push(payLoadInventory);
+			});
+
+			$.grep(invTraDesDataEntry, function (invTransObjEntry) {
+				batchUrl.push({
+					url: "/b1s/v2/InventoryGenEntries",
+					data: invTransObjEntry,
+					method: "POST"
+				});
+			});
+
+			//return;
+			jsonModel.setProperty("/errorTxt", []);
+			this.createBatchCall(batchUrl, function () {
+				var errorTxt = jsonModel.getProperty("/errorTxt");
+				if (errorTxt.length > 0) {
+					sap.m.MessageBox.error(errorTxt.join("\n"));
+				} else {
+					sap.m.MessageToast.show("Stem VM created for selected plants");
+				}
+				that.createStemVMDialog.close();
+				that.createStemVMDialog.setBusy(false);
+				that.clearData();
+				that.loadStrainData();
+				that.byId("microPropagationTable").setSelectedIndex(-1);
+			}, this.createStemVMDialog);
+		},
+
 		//method for Innoculate
 		onInnoculate: function () {
 			var jsonModel = this.getOwnerComponent().getModel("jsonModel");
@@ -318,7 +445,12 @@ sap.ui.define([
 				if (cannabisItemArray.length > 0) {
 					var cannabisItemCode = cannabisItemArray[0].ItemCode;
 				}
-				sap.ui.core.Fragment.byId("InnoculateGrowthPhaseDialog", "Item").setSelectedKey(cannabisItemCode);
+				if (this.InnoculateGrowthPhaseDialog) {
+					sap.ui.core.Fragment.byId("InnoculateGrowthPhaseDialog", "Item").setSelectedKey(cannabisItemCode);
+				}
+				if (this.createStemVMDialog) {
+					sap.ui.core.Fragment.byId("createStemVMDialog", "Item").setSelectedKey(cannabisItemCode);
+				}
 			});
 		},
 		InnoculateClose: function () {
@@ -1570,9 +1702,15 @@ sap.ui.define([
 			this.loadStrainData();
 		},
 		handleRowSelection: function () {
-			var sItems;
+			var jsonModel = this.getOwnerComponent().getModel("jsonModel");
 			var table = this.getView().byId("microPropagationTable");
 			sItems = table.getSelectedIndices();
+			var sItems;
+			if (sItems.length === 1) {
+				jsonModel.setProperty("/isSingleSelect", true);
+			} else {
+				jsonModel.setProperty("/isSingleSelect", false);
+			}
 		}
 
 	});

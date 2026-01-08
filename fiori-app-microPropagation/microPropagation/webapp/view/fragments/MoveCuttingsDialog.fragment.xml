@@ -14,6 +14,7 @@
 					<Select id="growthPhase" width="15rem" forceSelection="false">
 						<core:Item key="Preservation" text="Preservation"/>
 						<core:Item key="Multiplication" text="Multiplication"/>
+						<core:Item key="MacroPropagation" text="Macro Propagation"/>
 					</Select>
 				</InputListItem>
 				<InputListItem label="{i18n>Date}">
