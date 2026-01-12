@@ -11,28 +11,28 @@
 		<content>
 			<FlexBox direction="Column">
 				<InputListItem label="No. of plants">
-					<Input id="avalQty" editable="false" width="15rem"/>
+					<Input id="avalQty" editable="false" width="17rem"/>
 				</InputListItem>
 				<InputListItem label="Growth Phase">
-					<Select id="growthPhase" width="15rem" forceSelection="true" editable="false">
+					<Select id="growthPhase" width="17rem" forceSelection="true" editable="false">
 						<core:Item key="DIFF Callus" text="DIFF Callus"/>
 					</Select>
 				</InputListItem>
 				<InputListItem label="Item">
-					<Select id="Item" width="15rem" items="{path: 'jsonModel>/DiffCalluseItemsList'}" forceSelection="false" editable="false">
+					<Select id="Item" width="17rem" items="{path: 'jsonModel>/DiffCalluseItemsList'}" forceSelection="false" editable="false">
 						<items>
 							<core:Item key="{jsonModel>ItemCode}" text="{jsonModel>ItemName}"/>
 						</items>
 					</Select>
 				</InputListItem>
-				<!--<InputListItem label="{i18n>SelectLocation}" visible="{= ${jsonModel>/cgPhase} === 'Vegetative'}">-->
-				<!--	<Select id="location" width="15rem" items="{path: 'jsonModel>/CloneCGVegList', sorter : { path : 'key', descending : false }}"-->
-				<!--		forceSelection="false">-->
-				<!--		<core:Item key="{jsonModel>key}" text="{jsonModel>key} - {jsonModel>text}"/>-->
-				<!--	</Select>-->
-				<!--</InputListItem>-->
+				<InputListItem label="Location">
+					<Select id="location" width="17rem" items="{path: 'jsonModel>/DifCallusLocationList', sorter : { path : 'key', descending : false }}"
+						forceSelection="true" editable="false">
+						<core:Item key="{jsonModel>key}" text="{jsonModel>key} - {jsonModel>text}"/>
+					</Select>
+				</InputListItem>
 				<InputListItem label="{i18n>Date}">
-					<DatePicker id="mDate" displayFormat="yyyy-MM-dd" width="15rem"/>
+					<DatePicker id="mDate" displayFormat="yyyy-MM-dd" width="17rem"/>
 				</InputListItem>
 			</FlexBox>
 		</content>

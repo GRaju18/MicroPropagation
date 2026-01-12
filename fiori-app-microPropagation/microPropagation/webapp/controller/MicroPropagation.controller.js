@@ -143,6 +143,7 @@ sap.ui.define([
 			var table = this.getView().byId("microPropagationTable");
 			var vRoom = sap.ui.core.Fragment.byId("moveCuttingsDialog", "growthPhase").getSelectedKey();
 			var createDate = sap.ui.core.Fragment.byId("moveCuttingsDialog", "mDate").getDateValue();
+			var locationID = sap.ui.core.Fragment.byId("moveCuttingsDialog", "location").getSelectedKey();
 			var dateFormat = DateFormat.getDateInstance({
 				pattern: "yyyy-MM-dd"
 			});
@@ -151,7 +152,8 @@ sap.ui.define([
 			var sItems;
 			sItems = table.getSelectedIndices();
 			var batchUrl = [],
-				sObj;
+				invTrasData = [],
+				payLoadInventory, sObj;
 
 			if (vRoom === "Preservation") {
 				var Phase = "MP_Preserve";
@@ -160,8 +162,8 @@ sap.ui.define([
 				var Phase = "MP_Multiply";
 				var phaseText = "Multiplication";
 			} else {
-				var Phase = "";
-				var phaseText = "";
+				var Phase = "Mother";
+				var phaseText = "Mother";
 			}
 			$.each(sItems, function (i, e) {
 				sObj = table.getContextByIndex(e).getObject();
@@ -173,6 +175,86 @@ sap.ui.define([
 					url: "/b1s/v2/BatchNumberDetails(" + sObj.AbsEntry + ")",
 					data: payLoadFloInventoryEntry,
 					method: "PATCH"
+				});
+
+				if (sObj.WhsCode !== locationID) {
+					if (invTrasData.length > 0) {
+						var returntrasObj, returnLines;
+						returntrasObj = $.grep(invTrasData, function (trasObj) {
+							if (trasObj.FromWarehouse === sObj.WhsCode) {
+								return trasObj;
+							}
+						});
+						if (returntrasObj.length > 0) {
+							returnLines = $.grep(returntrasObj[0].StockTransferLines, function (lines) {
+								if (lines.ItemCode === sObj.ItemCode) {
+									return lines;
+								}
+							});
+							if (returnLines.length > 0) {
+								returnLines[0].BatchNumbers.push({
+									"BatchNumberProperty": sObj.BatchNum,
+									"Quantity": 1
+								});
+								returnLines[0].Quantity = returnLines[0].BatchNumbers.length;
+							} else {
+								returntrasObj[0].StockTransferLines.push({
+									"LineNum": returntrasObj[0].StockTransferLines.length,
+									"ItemCode": sObj.ItemCode,
+									"Quantity": 1,
+									"WarehouseCode": locationID,
+									"FromWarehouseCode": sObj.WhsCode,
+									"BatchNumbers": [{
+										"BatchNumberProperty": sObj.BatchNum,
+										"Quantity": 1
+									}]
+								});
+							}
+						} else {
+							payLoadInventory = {
+								"FromWarehouse": sObj.WhsCode,
+								"ToWarehouse": locationID,
+								"BPLID": jsonModel.getProperty("/sLinObj").U_NBRCD,
+								"StockTransferLines": [{
+									"LineNum": 0,
+									"ItemCode": sObj.ItemCode,
+									"Quantity": 1,
+									"WarehouseCode": locationID,
+									"FromWarehouseCode": sObj.WhsCode,
+									"BatchNumbers": [{
+										"BatchNumberProperty": sObj.BatchNum,
+										"Quantity": 1
+									}]
+								}]
+							};
+							invTrasData.push(payLoadInventory);
+						}
+					} else {
+						payLoadInventory = {
+							"FromWarehouse": sObj.WhsCode,
+							"ToWarehouse": locationID,
+							"BPLID": jsonModel.getProperty("/sLinObj").U_NBRCD,
+							"StockTransferLines": [{
+								"LineNum": 0,
+								"ItemCode": sObj.ItemCode,
+								"Quantity": 1,
+								"WarehouseCode": locationID,
+								"FromWarehouseCode": sObj.WhsCode,
+								"BatchNumbers": [{
+									"BatchNumberProperty": sObj.BatchNum,
+									"Quantity": 1
+								}]
+							}]
+						};
+						invTrasData.push(payLoadInventory);
+					}
+				}
+			});
+			$.grep(invTrasData, function (invTransObj) {
+				batchUrl.push({
+					url: "/b1s/v2/StockTransfers",
+					data: invTransObj,
+					method: "POST"
 				});
 			});
 			jsonModel.setProperty("/errorTxt", []);
@@ -315,6 +397,7 @@ sap.ui.define([
 			var jsonModel = this.getOwnerComponent().getModel("jsonModel");
 			var table = this.getView().byId("microPropagationTable");
 			var vRoom = sap.ui.core.Fragment.byId("createStemVMDialog", "growthPhase").getSelectedKey();
+			var locationID = sap.ui.core.Fragment.byId("createStemVMDialog", "location").getSelectedKey();
 			var createDate = sap.ui.core.Fragment.byId("createStemVMDialog", "mDate").getDateValue();
 			var dateFormat = DateFormat.getDateInstance({
 				pattern: "yyyy-MM-dd"
@@ -361,12 +444,12 @@ sap.ui.define([
 					"DocumentLines": [{
 						"LineNum": 0,
 						"ItemCode": innoculateItemCode,
-						"WarehouseCode": sObj.WhsCode,
+						"WarehouseCode": locationID,
 						"Quantity": 1,
 						"BatchNumbers": [{
 							"BatchNumber": plantID, //plant ID
 							"Quantity": 1,
-							"Location": sObj.WhsCode,
+							"Location": locationID,
 							"U_Phase": "MP_Multiply",
 							"ManufacturerSerialNumber": sObj.BatchNum, //source
 							"InternalSerialNumber": batchID, //batch ID
@@ -460,7 +543,7 @@ sap.ui.define([
 			var jsonModel = this.getOwnerComponent().getModel("jsonModel");
 			var table = this.getView().byId("microPropagationTable");
 			var vRoom = sap.ui.core.Fragment.byId("InnoculateGrowthPhaseDialog", "growthPhase").getSelectedKey();
-			//var locationID = sap.ui.core.Fragment.byId("InnoculateGrowthPhaseDialog", "location").getSelectedKey();
+			var locationID = sap.ui.core.Fragment.byId("InnoculateGrowthPhaseDialog", "location").getSelectedKey();
 			var createDate = sap.ui.core.Fragment.byId("InnoculateGrowthPhaseDialog", "mDate").getDateValue();
 			var dateFormat = DateFormat.getDateInstance({
 				pattern: "yyyy-MM-dd"
@@ -510,7 +593,7 @@ sap.ui.define([
 								1].LineNum + 1,
 							"ItemCode": innoculateItemCode,
 							"Quantity": 1,
-							"WarehouseCode": sObj.WhsCode,
+							"WarehouseCode": locationID,
 							"BatchNumbers": []
 						});
 						invTraDesDataEntry[invTraDesDataEntry.length - 1].DocumentLines[invTraDesDataEntry[invTraDesDataEntry.length - 1].DocumentLines
@@ -518,8 +601,7 @@ sap.ui.define([
 							.push({
 								"BatchNumber": sObj.BatchNum,
 								"Quantity": 1,
-								"Location": sObj.WhsCode,
-								//"U_Phase": "MP_Multiply",
+								"Location": locationID,
 								"U_Phase": U_Phase,
 								"ManufacturerSerialNumber": sObj.MnfSerial,
 								"InternalSerialNumber": sObj.IntrSerial,
@@ -532,12 +614,12 @@ sap.ui.define([
 							"DocumentLines": [{
 								"LineNum": 0,
 								"ItemCode": innoculateItemCode,
-								"WarehouseCode": sObj.WhsCode,
+								"WarehouseCode": locationID,
 								"Quantity": 1,
 								"BatchNumbers": [{
 									"BatchNumber": sObj.BatchNum,
 									"Quantity": 1,
-									"Location": sObj.WhsCode,
+									"Location": locationID,
 									"U_Phase": U_Phase,
 									"ManufacturerSerialNumber": sObj.MnfSerial,
 									"InternalSerialNumber": sObj.IntrSerial,
@@ -554,12 +636,12 @@ sap.ui.define([
 						"DocumentLines": [{
 							"LineNum": 0,
 							"ItemCode": innoculateItemCode,
-							"WarehouseCode": sObj.WhsCode,
+							"WarehouseCode": locationID,
 							"Quantity": 1,
 							"BatchNumbers": [{
 								"BatchNumber": sObj.BatchNum,
 								"Quantity": 1,
-								"Location": sObj.WhsCode,
+								"Location": locationID,
 								"U_Phase": U_Phase,
 								"ManufacturerSerialNumber": sObj.MnfSerial,
 								"InternalSerialNumber": sObj.IntrSerial,
@@ -711,16 +793,12 @@ sap.ui.define([
 			var jsonModel = this.getOwnerComponent().getModel("jsonModel");
 			var table = this.getView().byId("microPropagationTable");
 			var vRoom = sap.ui.core.Fragment.byId("callusGrowthPhaseDialog", "growthPhase").getSelectedKey();
-			//var locationID = sap.ui.core.Fragment.byId("callusGrowthPhaseDialog", "location").getSelectedKey();
+			var locationID = sap.ui.core.Fragment.byId("callusGrowthPhaseDialog", "location").getSelectedKey();
 			var createDate = sap.ui.core.Fragment.byId("callusGrowthPhaseDialog", "mDate").getDateValue();
 			var dateFormat = DateFormat.getDateInstance({
 				pattern: "yyyy-MM-dd"
 			});
 			var createdDate = dateFormat.format(createDate);
-			// if (locationID === "") {
-			// 	sap.m.MessageToast.show("Please select Location");
-			// 	return;
-			// }
 			var that = this;
 			var sItems = table.getSelectedIndices();
 
@@ -752,7 +830,7 @@ sap.ui.define([
 								1].LineNum + 1,
 							"ItemCode": innoculateItemCode,
 							"Quantity": 1,
-							"WarehouseCode": sObj.WhsCode,
+							"WarehouseCode": locationID,
 							"BatchNumbers": []
 						});
 						invTraDesDataEntry[invTraDesDataEntry.length - 1].DocumentLines[invTraDesDataEntry[invTraDesDataEntry.length - 1].DocumentLines
@@ -760,7 +838,7 @@ sap.ui.define([
 							.push({
 								"BatchNumber": sObj.BatchNum,
 								"Quantity": 1,
-								"Location": sObj.WhsCode,
+								"Location": locationID,
 								"U_Phase": "MP_Multiply",
 								"ManufacturerSerialNumber": sObj.MnfSerial,
 								"InternalSerialNumber": sObj.IntrSerial,
@@ -773,12 +851,12 @@ sap.ui.define([
 							"DocumentLines": [{
 								"LineNum": 0,
 								"ItemCode": innoculateItemCode,
-								"WarehouseCode": sObj.WhsCode,
+								"WarehouseCode": locationID,
 								"Quantity": 1,
 								"BatchNumbers": [{
 									"BatchNumber": sObj.BatchNum,
 									"Quantity": 1,
-									"Location": sObj.WhsCode,
+									"Location": locationID,
 									"U_Phase": "MP_Multiply",
 									"ManufacturerSerialNumber": sObj.MnfSerial,
 									"InternalSerialNumber": sObj.IntrSerial,
@@ -795,12 +873,12 @@ sap.ui.define([
 						"DocumentLines": [{
 							"LineNum": 0,
 							"ItemCode": innoculateItemCode,
-							"WarehouseCode": sObj.WhsCode,
+							"WarehouseCode": locationID,
 							"Quantity": 1,
 							"BatchNumbers": [{
 								"BatchNumber": sObj.BatchNum,
 								"Quantity": 1,
-								"Location": sObj.WhsCode,
+								"Location": locationID,
 								"U_Phase": "MP_Multiply",
 								"ManufacturerSerialNumber": sObj.MnfSerial,
 								"InternalSerialNumber": sObj.IntrSerial,
@@ -952,16 +1030,12 @@ sap.ui.define([
 			var jsonModel = this.getOwnerComponent().getModel("jsonModel");
 			var table = this.getView().byId("microPropagationTable");
 			var vRoom = sap.ui.core.Fragment.byId("diffCallusGrowthPhaseDialog", "growthPhase").getSelectedKey();
-			//var locationID = sap.ui.core.Fragment.byId("diffCallusGrowthPhaseDialog", "location").getSelectedKey();
+			var locationID = sap.ui.core.Fragment.byId("diffCallusGrowthPhaseDialog", "location").getSelectedKey();
 			var createDate = sap.ui.core.Fragment.byId("diffCallusGrowthPhaseDialog", "mDate").getDateValue();
 			var dateFormat = DateFormat.getDateInstance({
 				pattern: "yyyy-MM-dd"
 			});
 			var createdDate = dateFormat.format(createDate);
-			// if (locationID === "") {
-			// 	sap.m.MessageToast.show("Please select Location");
-			// 	return;
-			// }
 			var that = this;
 			var sItems = table.getSelectedIndices();
 
@@ -993,7 +1067,7 @@ sap.ui.define([
 								1].LineNum + 1,
 							"ItemCode": innoculateItemCode,
 							"Quantity": 1,
-							"WarehouseCode": sObj.WhsCode,
+							"WarehouseCode": locationID,
 							"BatchNumbers": []
 						});
 						invTraDesDataEntry[invTraDesDataEntry.length - 1].DocumentLines[invTraDesDataEntry[invTraDesDataEntry.length - 1].DocumentLines
@@ -1001,7 +1075,7 @@ sap.ui.define([
 							.push({
 								"BatchNumber": sObj.BatchNum,
 								"Quantity": 1,
-								"Location": sObj.WhsCode,
+								"Location": locationID,
 								"U_Phase": "MP_Multiply",
 								"ManufacturerSerialNumber": sObj.MnfSerial,
 								"InternalSerialNumber": sObj.IntrSerial,
@@ -1014,12 +1088,12 @@ sap.ui.define([
 							"DocumentLines": [{
 								"LineNum": 0,
 								"ItemCode": innoculateItemCode,
-								"WarehouseCode": sObj.WhsCode,
+								"WarehouseCode": locationID,
 								"Quantity": 1,
 								"BatchNumbers": [{
 									"BatchNumber": sObj.BatchNum,
 									"Quantity": 1,
-									"Location": sObj.WhsCode,
+									"Location": locationID,
 									"U_Phase": "MP_Multiply",
 									"ManufacturerSerialNumber": sObj.MnfSerial,
 									"InternalSerialNumber": sObj.IntrSerial,
@@ -1036,12 +1110,12 @@ sap.ui.define([
 						"DocumentLines": [{
 							"LineNum": 0,
 							"ItemCode": innoculateItemCode,
-							"WarehouseCode": sObj.WhsCode,
+							"WarehouseCode": locationID,
 							"Quantity": 1,
 							"BatchNumbers": [{
 								"BatchNumber": sObj.BatchNum,
 								"Quantity": 1,
-								"Location": sObj.WhsCode,
+								"Location": locationID,
 								"U_Phase": "MP_Multiply",
 								"ManufacturerSerialNumber": sObj.MnfSerial,
 								"InternalSerialNumber": sObj.IntrSerial,
@@ -1193,7 +1267,7 @@ sap.ui.define([
 			var jsonModel = this.getOwnerComponent().getModel("jsonModel");
 			var table = this.getView().byId("microPropagationTable");
 			var Phase = sap.ui.core.Fragment.byId("createCloneDialog", "phase").getSelectedKey();
-			//var locationID = sap.ui.core.Fragment.byId("createCloneDialog", "location").getSelectedKey();
+			var locationID = sap.ui.core.Fragment.byId("createCloneDialog", "location").getSelectedKey();
 			var createDate = sap.ui.core.Fragment.byId("createCloneDialog", "mDate").getDateValue();
 			var dateFormat = DateFormat.getDateInstance({
 				pattern: "yyyy-MM-dd"
@@ -1234,7 +1308,7 @@ sap.ui.define([
 								1].LineNum + 1,
 							"ItemCode": innoculateItemCode,
 							"Quantity": 1,
-							"WarehouseCode": sObj.WhsCode,
+							"WarehouseCode": locationID,
 							"BatchNumbers": []
 						});
 						invTraDesDataEntry[invTraDesDataEntry.length - 1].DocumentLines[invTraDesDataEntry[invTraDesDataEntry.length - 1].DocumentLines
@@ -1242,7 +1316,7 @@ sap.ui.define([
 							.push({
 								"BatchNumber": sObj.BatchNum,
 								"Quantity": 1,
-								"Location": sObj.WhsCode,
+								"Location": locationID,
 								"U_Phase": Phase,
 								"ManufacturerSerialNumber": sObj.MnfSerial,
 								"InternalSerialNumber": sObj.IntrSerial,
@@ -1255,12 +1329,12 @@ sap.ui.define([
 							"DocumentLines": [{
 								"LineNum": 0,
 								"ItemCode": innoculateItemCode,
-								"WarehouseCode": sObj.WhsCode,
+								"WarehouseCode": locationID,
 								"Quantity": 1,
 								"BatchNumbers": [{
 									"BatchNumber": sObj.BatchNum,
 									"Quantity": 1,
-									"Location": sObj.WhsCode,
+									"Location": locationID,
 									"U_Phase": Phase,
 									"ManufacturerSerialNumber": sObj.MnfSerial,
 									"InternalSerialNumber": sObj.IntrSerial,
@@ -1277,12 +1351,12 @@ sap.ui.define([
 						"DocumentLines": [{
 							"LineNum": 0,
 							"ItemCode": innoculateItemCode,
-							"WarehouseCode": sObj.WhsCode,
+							"WarehouseCode": locationID,
 							"Quantity": 1,
 							"BatchNumbers": [{
 								"BatchNumber": sObj.BatchNum,
 								"Quantity": 1,
-								"Location": sObj.WhsCode,
+								"Location": locationID,
 								"U_Phase": Phase,
 								"ManufacturerSerialNumber": sObj.MnfSerial,
 								"InternalSerialNumber": sObj.IntrSerial,

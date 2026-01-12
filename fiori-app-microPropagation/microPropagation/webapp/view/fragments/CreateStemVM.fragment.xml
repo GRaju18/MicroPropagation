@@ -22,6 +22,12 @@
 						</items>
 					</Select>
 				</InputListItem>
+				<InputListItem label="Location">
+					<Select id="location" width="15rem" items="{path: 'jsonModel>/StemVMLocationList', sorter : { path : 'key', descending : false }}"
+						forceSelection="true" editable="false">
+						<core:Item key="{jsonModel>key}" text="{jsonModel>key} - {jsonModel>text}"/>
+					</Select>
+				</InputListItem>
 				<InputListItem label="{i18n>Date}">
 					<DatePicker id="mDate" displayFormat="yyyy-MM-dd" width="15rem"/>
 				</InputListItem>

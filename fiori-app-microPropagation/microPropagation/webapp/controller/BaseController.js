@@ -51,7 +51,7 @@ sap.ui.define([
 		},
 		getAppConfigData: function () {
 			var jsonModel = this.getOwnerComponent().getModel("jsonModel");
-			var filters = "?$filter=U_NAPP eq 'AllApps'  or U_NAPP eq 'Pheno Track' or U_NAPP eq 'Clone Planner' ";
+			var filters = "?$filter=U_NAPP eq 'AllApps'  or U_NAPP eq 'Micro Propagation' ";
 			this.readServiecLayer("/b1s/v2/U_NCNFG" + filters, function (data) {
 				if (data.value.length > 0) {
 					$.each(data.value, function (i, e) {
@@ -61,73 +61,61 @@ sap.ui.define([
 								try {
 									var wasteUOMJson = JSON.parse(wasteUOM);
 									jsonModel.setProperty("/uomVals", wasteUOMJson);
-
 								} catch (error) {
 									sap.m.MessageToast.show(error);
 								}
 							}
-						} else if (e.U_NFLDS === "Seedlings") {
+						} else if (e.U_NFLDS === "CUTTING") {
 							var SeedlingsArr = e.U_NVALUE;
 							if (SeedlingsArr !== "") {
 								try {
 									var seedlingeUOMJson = JSON.parse(SeedlingsArr);
-									jsonModel.setProperty("/createSeedlings", seedlingeUOMJson);
+									jsonModel.setProperty("/CuttingsLocatonList", seedlingeUOMJson);
 								} catch (error) {
 									sap.m.MessageToast.show(error);
 								}
 							}
-						} else if (e.U_NFLDS === "Cannabis Plants") {
+						} else if (e.U_NFLDS === "STEM VM") {
 							var CannabissArr = e.U_NVALUE;
 							if (CannabissArr !== "") {
 								try {
 									var CannabissUOMJson = JSON.parse(CannabissArr);
-									jsonModel.setProperty("/cannabisLocationList", CannabissUOMJson);
+									jsonModel.setProperty("/StemVMLocationList", CannabissUOMJson);
 								} catch (error) {
 									sap.m.MessageToast.show(error);
 								}
 							}
-						} else if (e.U_NAPP === "Pheno Track" && e.U_NFLDS === "CGPVeg") {
+						} else if (e.U_NFLDS === "CALLUS") {
 							var ChangeGrowthPhase = e.U_NVALUE;
 							if (ChangeGrowthPhase !== "") {
 								try {
 									var ChangeGrowthUOMJson = JSON.parse(ChangeGrowthPhase);
-									jsonModel.setProperty("/CGPVegList", ChangeGrowthUOMJson);
+									jsonModel.setProperty("/CallusLocationList", ChangeGrowthUOMJson);
 								} catch (error) {
 									sap.m.MessageToast.show(error);
 								}
 							}
-						} else if (e.U_NFLDS === "Mark as Mother") {
+						} else if (e.U_NFLDS === "DIF CALLUS") {
 							var motherPhase = e.U_NVALUE;
 							if (motherPhase !== "") {
 								try {
 									var motherUOMJson = JSON.parse(motherPhase);
-									jsonModel.setProperty("/markAsMotherList", motherUOMJson);
+									jsonModel.setProperty("/DifCallusLocationList", motherUOMJson);
 								} catch (error) {
 									sap.m.MessageToast.show(error);
 								}
 							}
-						} else if (e.U_NFLDS === "Create Clones") {
+						} else if (e.U_NFLDS === "CLONE") {
 							var createClone = e.U_NVALUE;
 							if (createClone !== "") {
 								try {
 									var createCloneJson = JSON.parse(createClone);
-									jsonModel.setProperty("/createCloneLocation", createCloneJson);
-								} catch (error) {
-									sap.m.MessageToast.show(error);
-								}
-							}
-						} else if (e.U_NAPP === "Clone Planner" && e.U_NFLDS === "CGPVeg") {
-							var CloneChangeGrowthPhase = e.U_NVALUE;
-							if (CloneChangeGrowthPhase !== "") {
-								try {
-									var CloneChangeGrowthUOMJson = JSON.parse(CloneChangeGrowthPhase);
-									jsonModel.setProperty("/CloneCGVegList", CloneChangeGrowthUOMJson);
+									jsonModel.setProperty("/createCloneLocationList", createCloneJson);
 								} catch (error) {
 									sap.m.MessageToast.show(error);
 								}
 							}
 						}
-
 					});
 				}
 			});
