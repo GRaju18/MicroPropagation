@@ -45,14 +45,14 @@ sap.ui.define([
 
 			//set the odata service call model
 			var jsonModel = new JSONModel({
-				versionInfo: "v1.125.22",
+				versionInfo: "v1.125.23",
 				strainList: [],
 				createMode: false,
 				serLayerbaseUrl: "https://login.seedandbeyond.com:50000",
 				userAuthPayload: {
 					"CompanyDB": "QAS",
-					"UserName": "aag11103",
-					"Password": "Beyond$101@PLM@Seed!3"
+					"UserName": "SusmitaN",
+					"Password": "Sreehan@123"
 				},
 				//set the app navigation URL model
 				serviceLayerbaseUrl: "https://demo.seedandbeyond.com/webx/index.html#",
