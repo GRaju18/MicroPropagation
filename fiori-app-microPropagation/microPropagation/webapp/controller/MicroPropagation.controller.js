@@ -96,8 +96,6 @@ sap.ui.define([
 				this.byId("tableHeader2").setText("Plants (" + data.value.length + ")");
 				this.byId("tableHeader3").setText("Plants (" + data.value.length + ")");
 			}, this.getView());
-
-			that.loadAllData();
 		},
 		loadAllData: function () {
 			var jsonModel = this.getOwnerComponent().getModel("jsonModel");
@@ -156,6 +154,7 @@ sap.ui.define([
 				sap.ui.core.Fragment.byId("moveCuttingsDialog", "growthPhase").setSelectedKey("");
 				sap.ui.core.Fragment.byId("moveCuttingsDialog", "mDate").setDateValue(new Date());
 				this.moveCuttingsDialog.open();
+				that.loadAllData();
 			} else {
 				sap.m.MessageToast.show("Please select atleast one plant");
 			}
@@ -225,10 +224,13 @@ sap.ui.define([
 
 				$.each(sItems, function (i, e) {
 					sObj = table.getContextByIndex(e).getObject();
+					if (sObj.U_BatAttr3 == null) {
+						sObj.U_BatAttr3 = "";
+					}
 					var payLoadFloInventoryEntryNew = {
 						U_Phase: Phase,
 						//U_FlowerDate: newDate,
-						BatchAttribute1: sObj.MnfSerial, //source
+						BatchAttribute1: sObj.IntrSerial, //source
 						U_BatAttr3: sObj.U_BatAttr3 + ":" + sObj.IntrSerial, //all source
 						BatchAttribute2: batchID //batch ID
 					};
@@ -323,6 +325,7 @@ sap.ui.define([
 				});
 			});
 			jsonModel.setProperty("/errorTxt", []);
+			//return;
 			this.createBatchCall(batchUrl, function () {
 				var errorTxt = jsonModel.getProperty("/errorTxt");
 				if (errorTxt.length > 0) {
@@ -341,7 +344,9 @@ sap.ui.define([
 
 		/***method start for Preservation***/
 		sendToStorage: function () {
+
 			var that = this;
+			that.loadAllData();
 			var jsonModel = that.getOwnerComponent().getModel("jsonModel");
 			var sItems;
 			var microPropagationTable = this.getView().byId("microPropagationTable");
@@ -388,10 +393,13 @@ sap.ui.define([
 
 								$.each(sItems, function (i, e) {
 									sObj = microPropagationTable.getContextByIndex(e).getObject();
+									if (sObj.U_BatAttr3 == null) {
+										sObj.U_BatAttr3 = "";
+									}
 									var payLoadFloInventoryEntryNew = {
 										U_Phase: "MP_Store",
 										//U_FlowerDate: newDate,
-										BatchAttribute1: sObj.MnfSerial, //source
+										BatchAttribute1: sObj.IntrSerial, //source
 										U_BatAttr3: sObj.U_BatAttr3 + ":" + sObj.IntrSerial, //all source
 										BatchAttribute2: batchID //batch ID
 									};
@@ -426,6 +434,7 @@ sap.ui.define([
 		//method for send to Preservation
 		sendToPreservation: function () {
 			var that = this;
+			that.loadAllData();
 			var jsonModel = that.getOwnerComponent().getModel("jsonModel");
 			var sItems;
 			var microPropagationTable = this.getView().byId("microPropagationTable");
@@ -470,9 +479,12 @@ sap.ui.define([
 
 								$.each(sItems, function (i, e) {
 									sObj = microPropagationTable.getContextByIndex(e).getObject();
+									if (sObj.U_BatAttr3 == null) {
+										sObj.U_BatAttr3 = "";
+									}
 									var payLoadFloInventoryEntryNew = {
 										U_Phase: "MP_Preserve",
-										BatchAttribute1: sObj.MnfSerial, //source
+										BatchAttribute1: sObj.IntrSerial, //source
 										U_BatAttr3: sObj.U_BatAttr3 + ":" + sObj.IntrSerial, //all source
 										BatchAttribute2: batchID //batch ID
 									};
@@ -520,6 +532,7 @@ sap.ui.define([
 				sap.ui.core.Fragment.byId("createStemVMDialog", "mDate").setDateValue(new Date());
 				this.createStemVMDialog.open();
 				this.loadInnoculateItems(updateObject);
+				this.loadAllData();
 			} else {
 				sap.m.MessageToast.show("Please select atleast one plant");
 			}
@@ -638,6 +651,7 @@ sap.ui.define([
 					sap.ui.core.Fragment.byId("InnoculateGrowthPhaseDialog", "mDate").setDateValue(new Date());
 					this.InnoculateGrowthPhaseDialog.open();
 					this.loadInnoculateItems(updateObject);
+					this.loadAllData();
 				} else {
 					sap.m.MessageToast.show("You can not change the growth phase of this plant");
 					return;
@@ -999,6 +1013,7 @@ sap.ui.define([
 					sap.ui.core.Fragment.byId("callusGrowthPhaseDialog", "mDate").setDateValue(new Date());
 					this.callusGrowthPhaseDialog.open();
 					this.loadCallusItems(updateObject);
+					this.loadAllData();
 				} else {
 					sap.m.MessageToast.show("You can not change the growth phase of this plant");
 					return;
@@ -1348,6 +1363,7 @@ sap.ui.define([
 					sap.ui.core.Fragment.byId("diffCallusGrowthPhaseDialog", "mDate").setDateValue(new Date());
 					this.diffCallusGrowthPhaseDialog.open();
 					this.loadDiffCallusItems(updateObject);
+					this.loadAllData();
 				} else {
 					sap.m.MessageToast.show("You can not change the growth phase of this plant");
 					return;
@@ -1697,6 +1713,7 @@ sap.ui.define([
 					sap.ui.core.Fragment.byId("createCloneDialog", "mDate").setDateValue(new Date());
 					this.createCloneDialog.open();
 					this.loadCloneItems(updateObject);
+					this.loadAllData();
 				} else {
 					sap.m.MessageToast.show("You can not change the growth phase of this plant");
 					return;
@@ -2034,6 +2051,7 @@ sap.ui.define([
 		/***method start for Storage***/
 		sendToMultiplication: function () {
 			var that = this;
+			that.loadAllData();
 			var jsonModel = that.getOwnerComponent().getModel("jsonModel");
 			var sItems;
 			var microPropagationTable = this.getView().byId("microPropagationTable");
@@ -2082,7 +2100,7 @@ sap.ui.define([
 									sObj = microPropagationTable.getContextByIndex(e).getObject();
 									var payLoadFloInventoryEntryNew = {
 										U_Phase: "MP_Multiply",
-										BatchAttribute1: sObj.MnfSerial, //source
+										BatchAttribute1: sObj.IntrSerial, //source
 										U_BatAttr3: sObj.U_BatAttr3 + ":" + sObj.IntrSerial, //all source
 										BatchAttribute2: batchID //batch ID
 									};
