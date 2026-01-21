@@ -18,9 +18,10 @@
 			</f:SimpleForm>
 		</content>
 		<footer>
-			<Toolbar>
+			<OverflowToolbar>
 				<ToolbarSpacer/>
-			</Toolbar>
+				<Button id="close" text="Close" press="handleClose"/>
+			</OverflowToolbar>
 		</footer>
 	</Popover>
 </core:FragmentDefinition>

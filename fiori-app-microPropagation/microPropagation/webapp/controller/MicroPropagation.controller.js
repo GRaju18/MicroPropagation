@@ -139,6 +139,10 @@ sap.ui.define([
 			this.flowQuickView.bindElement(sPath);
 			this.flowQuickView.setModel(oModel);
 		},
+		handleClose: function () {
+			//this.byId("myResizablePopover").close();
+			this.flowQuickView.close();
+		},
 
 		/***method start for Reception***/
 		moveCuttings: function () {
@@ -224,14 +228,11 @@ sap.ui.define([
 
 				$.each(sItems, function (i, e) {
 					sObj = table.getContextByIndex(e).getObject();
-					if (sObj.U_BatAttr3 == null) {
-						sObj.U_BatAttr3 = "";
-					}
 					var payLoadFloInventoryEntryNew = {
 						U_Phase: Phase,
 						//U_FlowerDate: newDate,
 						BatchAttribute1: sObj.IntrSerial, //source
-						U_BatAttr3: sObj.U_BatAttr3 + ":" + sObj.IntrSerial, //all source
+						U_BatAttr3: sObj.MnfSerial + ":" + sObj.IntrSerial, //all source
 						BatchAttribute2: batchID //batch ID
 					};
 					batchUrl.push({
@@ -344,7 +345,6 @@ sap.ui.define([
 
 		/***method start for Preservation***/
 		sendToStorage: function () {
-
 			var that = this;
 			that.loadAllData();
 			var jsonModel = that.getOwnerComponent().getModel("jsonModel");
@@ -600,6 +600,7 @@ sap.ui.define([
 							"U_Phase": "MP_Multiply",
 							"ManufacturerSerialNumber": sObj.BatchNum, //source
 							"InternalSerialNumber": batchID, //batch ID
+							"U_BatAttr3": sObj.BatchNum, //all sources
 						}]
 					}]
 				};

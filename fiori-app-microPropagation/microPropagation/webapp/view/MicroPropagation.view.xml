@@ -120,10 +120,16 @@
 											<Text text="{jsonModel>ItemName}" wrapping="true"/>
 										</table:template>
 									</table:Column>
-									<table:Column sortProperty="MnfSerial" filterProperty="MnfSerial">
+									<table:Column sortProperty="MnfSerial" filterProperty="MnfSerial" visible="{= ${jsonModel>/sIconTab} === 'RECEPTION' }">
 										<Label text="{i18n>Source}" design="Bold"/>
 										<table:template>
-											<!--<Text text="{jsonModel>MnfSerial}" wrapping="true"/>-->
+											<Text text="{jsonModel>MnfSerial}" wrapping="true"/>
+										</table:template>
+									</table:Column>
+									<table:Column sortProperty="MnfSerial" filterProperty="MnfSerial"
+										visible="{= ${jsonModel>/sIconTab} === 'PRESERVATION' || ${jsonModel>/sIconTab} === 'MULTIPLICATION' || ${jsonModel>/sIconTab} === 'STORAGE'}">
+										<Label text="{i18n>Source}" design="Bold"/>
+										<table:template>
 											<Link text="{jsonModel>MnfSerial}" press="openQuickView"/>
 										</table:template>
 									</table:Column>

@@ -12,17 +12,17 @@
 			<FlexBox direction="Column">
 				<FlexBox direction="Column">
 					<InputListItem label="No. of plants">
-						<Input id="avalQty" editable="false" width="15rem"/>
+						<Input id="avalQty" editable="false" width="17rem"/>
 					</InputListItem>
 					<InputListItem label="Item">
-						<Select id="Item" width="15rem" items="{path: 'jsonModel>/CloneItemsList'}" forceSelection="false" editable="false">
+						<Select id="Item" width="17rem" items="{path: 'jsonModel>/CloneItemsList'}" forceSelection="false" editable="false">
 							<items>
 								<core:Item key="{jsonModel>ItemCode}" text="{jsonModel>ItemName}"/>
 							</items>
 						</Select>
 					</InputListItem>
 					<InputListItem label="Phase">
-						<Select id="phase" width="15rem" forceSelection=" false">
+						<Select id="phase" width="17rem" forceSelection=" false">
 							<items>
 								<core:Item key="Mother" text="Mother"/>
 								<core:Item key="Clone" text="Cultivation"/>
@@ -37,7 +37,7 @@
 						</Select>
 					</InputListItem>
 					<InputListItem label="{i18n>Date}">
-						<DatePicker id="mDate" displayFormat="yyyy-MM-dd" width="15rem"/>
+						<DatePicker id="mDate" displayFormat="yyyy-MM-dd" width="17rem"/>
 					</InputListItem>
 				</FlexBox>
 			</FlexBox>
