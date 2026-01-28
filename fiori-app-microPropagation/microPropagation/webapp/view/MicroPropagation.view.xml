@@ -82,7 +82,7 @@
 										<Text class="sapMTBSeparator"/>
 										<Button text="Send For Preservation" press="sendToPreservation" type="Default"/>
 										<Button text="Create Stem VM" press="createStemVM" type="Default" enabled="{jsonModel>/isSingleSelect}"/>
-										<Button text="Innoculate" press="onInnoculate" type="Default"/>
+										<!--<Button text="Innoculate" press="onInnoculate" type="Default"/>-->
 										<Button text="Record Callus" press="onRecordCallus" type="Default"/>
 										<Button text="Record Diff Callus" press="onRecordDiffCallus" type="Default"/>
 										<Button text="Mark As Clones" press="markAsClones" type="Default"/>

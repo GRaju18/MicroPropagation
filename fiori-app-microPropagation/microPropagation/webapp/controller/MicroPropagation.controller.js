@@ -1746,6 +1746,7 @@ sap.ui.define([
 			this.createCloneDialog.close();
 		},
 		onCloneCreate: function () {
+			return;
 			var jsonModel = this.getOwnerComponent().getModel("jsonModel");
 			var table = this.getView().byId("microPropagationTable");
 			var Phase = sap.ui.core.Fragment.byId("createCloneDialog", "phase").getSelectedKey();
@@ -2190,8 +2191,6 @@ sap.ui.define([
 			var table = this.getView().byId("microPropagationTable");
 			sItems = table.getSelectedIndices();
 			var that = this;
-			var wMethod = sap.ui.core.Fragment.byId("ConfirmDestroyPlant", "wMethod").getSelectedKey();
-			var matUsed = sap.ui.core.Fragment.byId("ConfirmDestroyPlant", "matUsed").getValue();
 			var uom = sap.ui.core.Fragment.byId("ConfirmDestroyPlant", "uom").getSelectedKey();
 			var reason = sap.ui.core.Fragment.byId("ConfirmDestroyPlant", "reason").getSelectedKey();
 			var notes = sap.ui.core.Fragment.byId("ConfirmDestroyPlant", "notes").getValue();
@@ -2199,13 +2198,7 @@ sap.ui.define([
 			var wasteWt = Number(sap.ui.core.Fragment.byId("ConfirmDestroyPlant", "wasteWt").getValue());
 			var plantCount = sItems.length;
 			var weightPerPlant = Number(wasteWt) / plantCount;
-			if (wMethod === "") {
-				sap.m.MessageToast.show("Please select waste method");
-				return;
-			} else if (matUsed === "") {
-				sap.m.MessageToast.show("Please enter material used");
-				return;
-			} else if (wasteWt === "" || wasteWt === 0) {
+			if (wasteWt === "" || wasteWt === 0) {
 				sap.m.MessageToast.show("Please enter waste weight");
 				return;
 			} else if (isNaN(wasteWt)) {
@@ -2216,9 +2209,6 @@ sap.ui.define([
 				return;
 			} else if (reason === "") {
 				sap.m.MessageToast.show("Please select reason");
-				return;
-			} else if (notes === "") {
-				sap.m.MessageToast.show("Please add notes");
 				return;
 			} else if (wRecDate === "") {
 				sap.m.MessageToast.show("Please select Date");
@@ -2240,9 +2230,6 @@ sap.ui.define([
 					var strainName = itemName.split(" - ")[0];
 					payLoadDestroyCreate = {
 						U_NPLID: sObj.BatchNum,
-						U_NWTMT: wMethod,
-						U_NMTUS: matUsed,
-						//U_NWTWT: wasteWt.toFixed(2),
 						U_NWTWT: weightPerPlant.toFixed(2),
 						U_NWTUM: uom,
 						U_NDTRS: reason,
@@ -2253,7 +2240,7 @@ sap.ui.define([
 						U_NSTNM: strainName,
 						U_NLCNM: sObj.WhsCode + " - " + sObj.WhsName, //location
 						U_NCLPL: "Plant", // clone or plant
-						U_NPHSE: "Pheno", //phase
+						U_NPHSE: "Micro Propagation", //phase
 						U_NLFID: jsonModel.getProperty("/selectedLicense")
 					};
 					batchUrl.push({
@@ -2323,17 +2310,15 @@ sap.ui.define([
 				var selObject = table.getContextByIndex(sItems[0]).getObject();
 				var payLoadWasteCreate = {
 					U_NPBID: selObject.IntrSerial,
-					U_NWTMT: wMethod,
-					U_NMTUS: matUsed,
 					U_NWTWT: wasteWt.toFixed(2),
 					U_NWTUM: uom,
 					U_NWTRS: reason,
 					U_NNOTE: notes,
+					U_NLFID: jsonModel.getProperty("/selectedLicense"),
+					U_NPQTY: sItems.length,
 					U_NCRDT: cDate,
 					U_NLUDT: that.convertUTCDateTime(new Date()),
 					U_NLCNM: selObject.WhsCode + " - " + selObject.WhsName,
-					U_NLFID: jsonModel.getProperty("/selectedLicense"), //license name
-					U_NPQTY: sItems.length
 				};
 				batchUrl.push({
 					url: "/b1s/v2/NWTHS",
@@ -2358,6 +2343,107 @@ sap.ui.define([
 				sap.m.MessageToast.show("Please select atleast one record");
 			}
 		},
+
+		/*method for Record residue start*/
+		performRecordResidue: function () {
+			var that = this;
+			var jsonModel = this.getOwnerComponent().getModel("jsonModel");
+			if (!this.reportWasteDialog) {
+				this.reportWasteDialog = sap.ui.xmlfragment("rWaste", "com.9b.MicroPropagation.view.fragments.RecordResidue", this);
+				this.getView().addDependent(this.reportWasteDialog);
+				var rSelect = "?$select=Name";
+				this.readServiecLayer("/b1s/v2/U_NWREA" + rSelect, function (data) {
+					jsonModel.setProperty("/WasteReasonsList", data.value);
+				});
+			}
+			this.reportWasteDialog.open();
+
+			var allBatchID = jsonModel.getProperty("/microPropagationTableData");
+			var batchIDListArr = [];
+			$.each(allBatchID, function (i, e) {
+				batchIDListArr.push({
+					"IntrSerial": e.IntrSerial
+				});
+			});
+			const uniqueArr = [...new Map(batchIDListArr.map(o => [o.IntrSerial, o])).values()];
+			// var UniqueBatchIDList = [new Set(batchIDListArr)];
+			jsonModel.setProperty("/UniqueBatchIDList", uniqueArr);
+
+			sap.ui.core.Fragment.byId("rWaste", "batchID").setSelectedKey("");
+			sap.ui.core.Fragment.byId("rWaste", "wasteWt").setValue("");
+			sap.ui.core.Fragment.byId("rWaste", "uom").setSelectedKey("");
+			sap.ui.core.Fragment.byId("rWaste", "reason").setSelectedKey("");
+			sap.ui.core.Fragment.byId("rWaste", "notes").setValue("");
+			sap.ui.core.Fragment.byId("rWaste", "wRecDate").setDateValue(new Date());
+		},
+		onChangeReportWaste: function (evt) {
+			var value = evt.getParameter("newValue");
+			value = value.replace(/[^.\d]/g, '').replace(/^(\d*\.?)|(\d*)\.?/g, "$1$2");
+			evt.getSource().setValue(value);
+		},
+		closeRecordWaste: function () {
+			this.reportWasteDialog.close();
+		},
+		onRecordResidue: function () {
+			var that = this;
+			var jsonModel = this.getOwnerComponent().getModel("jsonModel");
+			var licenseNo;
+			var sLicenNo = jsonModel.getProperty("/selectedLicense");
+			if (sLicenNo !== undefined) {
+				licenseNo = sLicenNo;
+			} else if (jsonModel.getProperty("/licenseList").length > 0) {
+				licenseNo = jsonModel.getProperty("/licenseList")[0].Code;
+			} else {
+				licenseNo = "";
+			}
+			var microPropagationTable = this.getView().byId("microPropagationTable");
+			var batchID = sap.ui.core.Fragment.byId("rWaste", "batchID").getSelectedKey();
+			var wasteWtValue = sap.ui.core.Fragment.byId("rWaste", "wasteWt").getValue();
+			var wasteuom = sap.ui.core.Fragment.byId("rWaste", "uom").getSelectedKey();
+			var reason = sap.ui.core.Fragment.byId("rWaste", "reason").getSelectedKey();
+			var note = sap.ui.core.Fragment.byId("rWaste", "notes").getValue();
+			var wRecDate = sap.ui.core.Fragment.byId("rWaste", "wRecDate").getValue();
+			var wasteWt = Number(sap.ui.core.Fragment.byId("rWaste", "wasteWt").getValue());
+			if (batchID === "") {
+				sap.m.MessageToast.show("Please select batch ID");
+				return;
+			} else if (wasteWtValue === "" || wasteWt === 0) {
+				sap.m.MessageToast.show("Please enter waste weight");
+				return;
+			} else if (isNaN(wasteWtValue)) {
+				sap.m.MessageToast.show("Please enter numeric value only");
+				return;
+			} else if (wasteuom === "") {
+				sap.m.MessageToast.show("Please select waste UOM");
+				return;
+			} else if (reason === "") {
+				sap.m.MessageToast.show("Please select reason");
+				return;
+			} else if (wRecDate === "") {
+				sap.m.MessageToast.show("Please select Date");
+				return;
+			} else {
+				var date = sap.ui.core.Fragment.byId("rWaste", "wRecDate").getDateValue();
+				var payLoad = {
+					U_NPBID: batchID,
+					U_NWTWT: wasteWt.toFixed(2),
+					U_NWTUM: wasteuom,
+					U_NWTRS: reason,
+					U_NNOTE: note,
+					U_NLFID: licenseNo,
+					U_NPQTY: 0,
+					U_NCRDT: that.convertUTCDateTime(date),
+					U_NLUDT: that.convertUTCDateTime(new Date()),
+				};
+				that.updateServiecLayer("/b1s/v2/NWTHS", function () {
+					that.reportWasteDialog.close();
+					that.loadMasterData();
+					sap.m.MessageToast.show("Record Wastage is Completed");
+					microPropagationTable.clearSelection();
+				}, payLoad, "POST", this.reportWasteDialog);
+			}
+		},
+		/*method used for Record waste end*/
 
 		clearAllFilters: function () {
 			var filterTable = this.getView().byId("microPropagationTable");

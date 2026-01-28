@@ -10,24 +10,10 @@
 		</customHeader>
 		<content>
 			<FlexBox direction="Column">
-				<InputListItem label="Location">
-					<Select id="wLocation" width="12rem" forceSelection="false"
-						items="{path: 'jsonModel>/ChangeLocationList' ,sorter : { path : 'WarehouseCode', descending : false }}">
-						<core:Item key="{jsonModel>WarehouseCode}" text="{jsonModel>WarehouseCode} - {jsonModel>WarehouseName}"/>
-					</Select>
-				</InputListItem>
 				<InputListItem label="Batch ID">
 					<Select id="batchID" width="12rem" items="{path: 'jsonModel>/UniqueBatchIDList'}" forceSelection="false">
 						<core:Item key="{jsonModel>IntrSerial}" text="{jsonModel>IntrSerial}"/>
 					</Select>
-				</InputListItem>
-				<InputListItem label="{i18n>WasteMethod}">
-					<Select id="wMethod" width="12rem" items="{path: 'jsonModel>/WasteMethodsList'}" forceSelection="false">
-						<core:Item key="{jsonModel>Name}" text="{jsonModel>Name}"/>
-					</Select>
-				</InputListItem>
-				<InputListItem label="{i18n>MaterialUsed}">
-					<Input id="matUsed" value="" width="12rem" required="true"/>
 				</InputListItem>
 				<InputListItem label="{i18n>WasteWeight}">
 					<Input id="wasteWt" width="12rem" required="true" liveChange="onChangeReportWaste"/>

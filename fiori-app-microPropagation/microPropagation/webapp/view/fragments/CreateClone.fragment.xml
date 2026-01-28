@@ -22,11 +22,9 @@
 						</Select>
 					</InputListItem>
 					<InputListItem label="Phase">
-						<Select id="phase" width="17rem" forceSelection=" false">
+						<Select id="phase" width="17rem" forceSelection="true" editable="false">
 							<items>
-								<core:Item key="Mother" text="Mother"/>
-								<core:Item key="Clone" text="Cultivation"/>
-								<core:Item key="" text="Clone Cultivation"/>
+								<core:Item key="MacroPropagation" text="Macro Propagation"/>
 							</items>
 						</Select>
 					</InputListItem>
