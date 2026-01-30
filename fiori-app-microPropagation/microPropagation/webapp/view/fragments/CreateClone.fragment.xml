@@ -24,7 +24,7 @@
 					<InputListItem label="Phase">
 						<Select id="phase" width="17rem" forceSelection="true" editable="false">
 							<items>
-								<core:Item key="MacroPropagation" text="Macro Propagation"/>
+								<core:Item key="Macro" text="Macro Propagation"/>
 							</items>
 						</Select>
 					</InputListItem>
