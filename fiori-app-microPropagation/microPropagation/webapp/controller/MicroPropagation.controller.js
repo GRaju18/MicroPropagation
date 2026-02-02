@@ -1097,6 +1097,27 @@ sap.ui.define([
 				sap.m.MessageToast.show("Please select atleast one plant");
 			}
 		},
+		loadInnoculateItems: function (updateObject) {
+			var cannabisItemArray = [];
+			var jsonModel = this.getOwnerComponent().getModel("jsonModel");
+			var filters4 = "?$filter=U_NLFID eq " + "'" + jsonModel.getProperty("/selectedLicense") + "' and ItemsGroupCode eq 109";
+			var fields4 = "&$select=" + ["ItemName", "ItemsGroupCode", "ItemCode", "U_NLFID"].join();
+			this.readServiecLayer("/b1s/v2/Items" + filters4 + fields4, function (data) {
+				jsonModel.setProperty("/InnoculateItemsList", data.value);
+				var strainName = updateObject.ItemName.split(" - ")[0];
+				$.each(data.value, function (i, e2) {
+					if (e2.ItemName === strainName + " - " + "Stem VM") {
+						cannabisItemArray.push(e2);
+					}
+				});
+				if (cannabisItemArray.length > 0) {
+					var cannabisItemCode = cannabisItemArray[0].ItemCode;
+				}
+				if (this.createStemVMDialog) {
+					sap.ui.core.Fragment.byId("createStemVMDialog", "Item").setSelectedKey(cannabisItemCode);
+				}
+			});
+		},
 		StemVMClose: function () {
 			this.createStemVMDialog.close();
 		},
