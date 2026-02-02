@@ -111,11 +111,8 @@ sap.ui.define([
 			var sObject = oEvent.getSource().getBindingContext("jsonModel").getObject();
 			var originalString = sObject.U_BatAttr3;
 			var specialChar = ":";
-			if (originalString != null) {
-				sObject.sourceIDs = originalString.split(specialChar).join('\n');
-			} else {
-				sObject.sourceIDs = "";
-			}
+			sObject.sourceIDs = originalString.split(specialChar).join('\n');
+
 			if (!this.flowQuickView) {
 				Fragment.load({
 					id: "flowQuickView",
@@ -123,15 +120,17 @@ sap.ui.define([
 					controller: this
 				}).then(function (oQuickView) {
 					this.flowQuickView = oQuickView;
-					this._configQuickView(oModel, sPath);
+					this._configQuickView(oModel, sPath, sObject.sourceIDs);
 					this.flowQuickView.openBy(oButton);
 				}.bind(this));
 			} else {
-				this._configQuickView(oModel, sPath);
+				this._configQuickView(oModel, sPath, sObject.sourceIDs);
 				this.flowQuickView.openBy(oButton);
 			}
 		},
-		_configQuickView: function (oModel, sPath) {
+		_configQuickView: function (oModel, sPath, sourceIDs) {
+			sap.ui.core.Fragment.byId("flowQuickView", "sourceID").setText(sourceIDs);
+
 			this.getView().addDependent(this.flowQuickView);
 			this.flowQuickView.close();
 			this.flowQuickView.bindElement(sPath);
