@@ -255,21 +255,6 @@ sap.ui.define([
 				});
 				var batchIDNew = that.generateCloneBatchID(uniqueText, strainCode, allData);
 
-				// $.each(sItems, function (i, e) {
-				// 	sObj = table.getContextByIndex(e).getObject();
-				// 	var payLoadFloInventoryEntryNew = {
-				// 		U_Phase: Phase,
-				// 		BatchAttribute1: sObj.IntrSerial, //source
-				// 		U_BatAttr3: sObj.MnfSerial + ":" + sObj.IntrSerial, //all source
-				// 		BatchAttribute2: batchID //batch ID
-				// 	};
-				// 	batchUrl.push({
-				// 		url: "/b1s/v2/BatchNumberDetails(" + sObj.AbsEntry + ")",
-				// 		data: payLoadFloInventoryEntryNew,
-				// 		method: "PATCH"
-				// 	});
-				// });
-
 				$.each(checkedPlantsArray, function (i, unObj) {
 					var payLoadCheckedUpdate = {
 						U_Phase: Phase,
