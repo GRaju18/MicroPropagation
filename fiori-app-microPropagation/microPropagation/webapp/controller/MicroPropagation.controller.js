@@ -526,6 +526,7 @@ sap.ui.define([
 									"U_Phase": Phase,
 									"ManufacturerSerialNumber": sObj.MnfSerial,
 									"InternalSerialNumber": sObj.IntrSerial,
+									"U_BatAttr3": sObj.U_BatAttr3 + ":" + sObj.IntrSerial, //all sources
 								});
 						} else {
 							payLoadInventory = {
@@ -544,6 +545,7 @@ sap.ui.define([
 										"U_Phase": Phase,
 										"ManufacturerSerialNumber": sObj.MnfSerial,
 										"InternalSerialNumber": sObj.IntrSerial,
+										"U_BatAttr3": sObj.U_BatAttr3 + ":" + sObj.IntrSerial, //all sources
 									}]
 								}]
 							};
@@ -566,6 +568,7 @@ sap.ui.define([
 									"U_Phase": Phase,
 									"ManufacturerSerialNumber": sObj.MnfSerial,
 									"InternalSerialNumber": sObj.IntrSerial,
+									"U_BatAttr3": sObj.U_BatAttr3 + ":" + sObj.IntrSerial, //all sources
 								}]
 							}]
 						};
@@ -1325,6 +1328,7 @@ sap.ui.define([
 									"U_Phase": "MP_Multiply",
 									"ManufacturerSerialNumber": sObj.MnfSerial,
 									"InternalSerialNumber": sObj.IntrSerial,
+									"U_BatAttr3": sObj.U_BatAttr3 + ":" + sObj.IntrSerial, //all sources
 								});
 						} else {
 							payLoadInventory = {
@@ -1343,6 +1347,7 @@ sap.ui.define([
 										"U_Phase": "MP_Multiply",
 										"ManufacturerSerialNumber": sObj.MnfSerial,
 										"InternalSerialNumber": sObj.IntrSerial,
+										"U_BatAttr3": sObj.U_BatAttr3 + ":" + sObj.IntrSerial, //all sources
 									}]
 								}]
 							};
@@ -1365,6 +1370,7 @@ sap.ui.define([
 									"U_Phase": "MP_Multiply",
 									"ManufacturerSerialNumber": sObj.MnfSerial,
 									"InternalSerialNumber": sObj.IntrSerial,
+									"U_BatAttr3": sObj.U_BatAttr3 + ":" + sObj.IntrSerial, //all sources
 								}]
 							}]
 						};
